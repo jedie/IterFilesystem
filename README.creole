@@ -1,0 +1,90 @@
+== IterFilesystem
+
+Threaded directory iteration via {{{os.scandir()}}} with progress indicator and resume function.
+
+Requirement:
+ * Python 3.6 or newer.
+ * [[https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv|Pipenv]]. Packages and virtual environment manager.
+
+Please: try, fork and contribute! ;)
+
+| {{https://travis-ci.org/jedie/IterFilesystem.svg|Build Status on travis-ci.org}} | [[https://travis-ci.org/jedie/IterFilesystem/|travis-ci.org/jedie/IterFilesystem]] |
+| {{https://ci.appveyor.com/api/projects/status/py5sl38ql3xciafc?svg=true|Build Status on appveyor.com}} | [[https://ci.appveyor.com/project/jedie/IterFilesystem/history|ci.appveyor.com/project/jedie/IterFilesystem]] |
+| {{https://coveralls.io/repos/jedie/IterFilesystem/badge.svg|Coverage Status on coveralls.io}} | [[https://coveralls.io/r/jedie/IterFilesystem|coveralls.io/r/jedie/IterFilesystem]] |
+| {{https://requires.io/github/jedie/IterFilesystem/requirements.svg?branch=master|Requirements Status on requires.io}} | [[https://requires.io/github/jedie/IterFilesystem/requirements/|requires.io/github/jedie/IterFilesystem/requirements/]] |
+
+
+== Example
+
+Use example CLI, e.g.:
+
+{{{
+~$ git clone https://github.com/jedie/IterFilesystem.git
+~$ cd IterFilesystem
+~/IterFilesystem$ pipenv install
+~/IterFilesystem$ pipenv shell
+(IterFilesystem) ~/IterFilesystem$ print_fs_stats --help
+usage: print_fs_stats.py [-h] [-v] [--path PATH]
+                         [--skip_dirs [SKIP_DIRS [SKIP_DIRS ...]]]
+                         [--skip_filenames [SKIP_FILENAMES [SKIP_FILENAMES ...]]]
+                         [--force_restart] [--complete_cleanup]
+
+Scan filesystem and print some information
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --version         show program's version number and exit
+  --path PATH           The file path that should be scanned e.g.: "~/foobar/"
+                        default is "~"
+  --skip_dirs [SKIP_DIRS [SKIP_DIRS ...]]
+                        Directory names to exclude from scan.
+  --skip_filenames [SKIP_FILENAMES [SKIP_FILENAMES ...]]
+                        File names to ignore.
+  --force_restart       Don't use resume data: Delete persist queue data
+                        before start.
+  --complete_cleanup    Delete persist queue after complete scan.
+}}}
+
+example output looks like this:
+
+{{{
+(IterFilesystem) ~/IterFilesystem$ $ print_fs_stats --path ~/IterFilesystem --skip_dirs .tox .pytest_cache
+Read/process: '/home/foobar/IterFilesystem'...
+Skip directories:
+	* .tox
+	* .pytest_cache
+
+[INFO:  61 2019-09-15 12:37:17,973] Save persist queue to: /home/foobar/IterFilesystem/persisted_queue_4Aubn
+[INFO:  37 2019-09-15 12:37:18,252] Skip dir: '.idea'
+[INFO:  37 2019-09-15 12:37:18,252] Skip dir: '.tox'
+[INFO:  37 2019-09-15 12:37:18,270] Skip dir: '.pytest_cache'
+Read filesystem with 83 items in 0.3sec.
+*** all items processed ***: 100%|████████████████████████████████████| 83/83 [00:00<00:00, 85.25it/s]
+
+total filesystem items: 83
+Finish in.............: 1.0sec.
+File count.....: 73 with 10991860 Bytes
+Directory count: 10
+Other count....: 0
+}}}
+
+
+
+== History
+
+* **dev** - [[https://github.com/jedie/IterFilesystem/compare/v0.0.1...master|compare v0.0.1...master]]
+** TBC
+* 15.09.2019 - v0.0.1
+** first Release on PyPi
+
+== Links
+
+* https://pypi.python.org/pypi/IterFilesystem/
+* https://github.com/jedie/IterFilesystem/
+
+
+== Donating
+
+* [[https://www.paypal.me/JensDiemer|paypal.me/JensDiemer]]
+* [[https://flattr.com/submit/auto?uid=jedie&url=https%3A%2F%2Fgithub.com%2Fjedie%2FIterFilesystem%2F|Flattr This!]]
+* Send [[http://www.bitcoin.org/|Bitcoins]] to [[https://blockexplorer.com/address/1823RZ5Md1Q2X5aSXRC5LRPcYdveCiVX6F|1823RZ5Md1Q2X5aSXRC5LRPcYdveCiVX6F]]
