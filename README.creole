@@ -76,8 +76,10 @@ Other count....: 0
 
 == History
 
-* **dev** - [[https://github.com/jedie/IterFilesystem/compare/v0.0.1...master|compare v0.0.1...master]]
+* **dev** - [[https://github.com/jedie/IterFilesystem/compare/v0.1.0...master|compare v0.1.0...master]]
 ** TBC
+* 15.09.2019 - [[https://github.com/jedie/IterFilesystem/compare/v0.0.1...v0.1.0|compare v0.0.1...v0.1.0]]
+** setup CI and fix tests
 * 15.09.2019 - v0.0.1
 ** first Release on PyPi
 

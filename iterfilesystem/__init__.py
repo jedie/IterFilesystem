@@ -22,7 +22,7 @@ from iterfilesystem.utils import left_shorten, string2hash
 
 __author__ = 'Jens Diemer'
 __email__ = 'python@jensdiemer.de'
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 
 
 def get_module_version():
