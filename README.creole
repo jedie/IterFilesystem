@@ -2,6 +2,10 @@
 
 Threaded directory iteration via {{{os.scandir()}}} with progress indicator and resume function.
 
+among other things these packages are used:
+ * {{{UniqueAckQ}}} from [[https://pypi.org/project/persist-queue/|persist-queue]]
+ * progress bar [[https://pypi.org/project/tqdm/|tqdm]]
+
 Requirement:
  * Python 3.6 or newer.
  * [[https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv|Pipenv]]. Packages and virtual environment manager.
