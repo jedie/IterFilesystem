@@ -9,6 +9,8 @@ from persistqueue.sqlackqueue import AckStatus
 from iterfilesystem import ThreadedFilesystemWalker
 from iterfilesystem.iter_scandir import ScandirWalker
 
+log = logging.getLogger()
+
 
 class FilesystemInformation:
     file_count = 0
@@ -23,20 +25,21 @@ class CountFilesystemWalker(ThreadedFilesystemWalker):
         super().__init__(*args, **kwargs)
 
     def process_path_item(self, path):
-        fs_item = Path(path)
-
-        with self.lock:
-            if fs_item.is_dir():
-                self.fs_info.dir_count += 1
-            elif fs_item.is_file():
-                self.fs_info.file_size += fs_item.stat().st_size
-                self.fs_info.file_count += 1
-            else:
-                self.fs_info.other_count += 1
-
-        # time.sleep(random.random() * 0.001)  # 'simulating' more process time
-
-        return AckStatus.acked
+        try:
+            fs_item = Path(path)
+            with self.lock:
+                if fs_item.is_dir():
+                    self.fs_info.dir_count += 1
+                elif fs_item.is_file():
+                    self.fs_info.file_size += fs_item.stat().st_size
+                    self.fs_info.file_count += 1
+                else:
+                    self.fs_info.other_count += 1
+        except OSError:
+            log.exception('error process path item')
+            return AckStatus.ack_failed
+        else:
+            return AckStatus.acked
 
     def print_stats(self):
         print(f'File count.....: {self.fs_info.file_count} with {self.fs_info.file_size} Bytes')

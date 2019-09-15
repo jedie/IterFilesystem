@@ -7,7 +7,6 @@ import shutil
 import sys
 import threading
 import time
-from pathlib import Path
 
 # https://github.com/peter-wangxu/persist-queue
 from persistqueue import Empty
@@ -18,7 +17,10 @@ from tqdm import tqdm  # https://github.com/tqdm/tqdm
 
 # IterFilesystem
 from iterfilesystem.humanize import human_time
-from iterfilesystem.utils import left_shorten, string2hash
+from iterfilesystem.utils import (
+    get_persist_temp_path,
+    left_shorten,
+)
 
 __author__ = 'Jens Diemer'
 __email__ = 'python@jensdiemer.de'
@@ -57,8 +59,8 @@ class ThreadedFilesystemWalker:
             raise AssertionError(
                 f'Given path {self.scandir_walker.top_path} is not a existing directory!'
             )
-        top_path_hash = string2hash(text=str(self.scandir_walker.top_path))
-        self.persist_path = Path(f'persisted_queue_{top_path_hash}').resolve()
+
+        self.persist_path = get_persist_temp_path(seed=str(self.scandir_walker.top_path))
         log.info('Save persist queue to: %s', self.persist_path)
 
         if force_restart:
@@ -180,15 +182,11 @@ class ThreadedFilesystemWalker:
                 self._update_process_bar(f'{thread_no:02} worker thread empty')
                 return
 
-            try:
-                ack_status = self.process_path_item(path=path)
-            except Exception as err:
-                log.exception('error process path item')
-                self.queue.ack_failed(path)
+            ack_status = self.process_path_item(path=path)
+            if ack_status == AckStatus.ack_failed:
                 with self.lock:
-                    print(f'ERROR {err} with {path}', file=sys.stderr)
+                    print(f'ERROR with {path}', file=sys.stderr)
                     self.failed_count += 1
-                continue
 
             try:
                 ack_func = self.ack_status2func[ack_status]
