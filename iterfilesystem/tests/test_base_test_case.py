@@ -11,5 +11,4 @@ class Test(BaseTestCase):
 
         own_path = Path(__file__)
         rel_path = own_path.relative_to(self.package_path)
-        assert str(rel_path) == "iterfilesystem/tests/test_base_test_case.py"
-
+        assert rel_path == Path("iterfilesystem/tests/test_base_test_case.py")
