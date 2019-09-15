@@ -24,7 +24,7 @@ from iterfilesystem.utils import (
 
 __author__ = 'Jens Diemer'
 __email__ = 'python@jensdiemer.de'
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 
 def get_module_version():
