@@ -55,7 +55,7 @@ if "publish" in sys.argv:
     try:
         # Test if wheel is installed, otherwise the user will only see:
         #   error: invalid command 'bdist_wheel'
-        import wheel
+        import wheel  # noqa
     except ImportError as err:
         print("\nError: %s" % err)
         print("\nMaybe https://pypi.org/project/wheel is not installed or virtualenv not activated?!?")
@@ -65,7 +65,7 @@ if "publish" in sys.argv:
         import_error = True
 
     try:
-        import twine
+        import twine  # noqa
     except ImportError as err:
         print("\nError: %s" % err)
         print("\nMaybe https://pypi.org/project/twine is not installed or virtualenv not activated?!?")
