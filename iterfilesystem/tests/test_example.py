@@ -25,7 +25,7 @@ class TestExample(BaseTestCase):
 
         assert "persist data doesn't exists" in log_messages
         assert "Skip file: '.gitignore'" in log_messages
-        assert "Skip dir: '.pytest_cache'" in log_messages
+        assert "Skip dir: '.tox'" in log_messages
         assert "Complete cleanup should be made" in log_messages
 
         walker.print_stats()
