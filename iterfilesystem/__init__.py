@@ -133,6 +133,7 @@ class ThreadedFilesystemWalker:
 
                 if self.complete_cleanup:
                     log.debug('Complete cleanup should be made...')
+                    del self.queue  # needed for windows to rmtree the sqlite files ;)
                     self._remove_persist_data()
 
             print(f'total filesystem items: {self.total_count}')
