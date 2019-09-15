@@ -134,7 +134,13 @@ class ThreadedFilesystemWalker:
                 if self.complete_cleanup:
                     log.debug('Complete cleanup should be made...')
                     del self.queue  # needed for windows to rmtree the sqlite files ;)
-                    self._remove_persist_data()
+                    try:
+                        self._remove_persist_data()
+                    except PermissionError as err:
+                        log.exception("Can't remove persistent data: %s", err)
+                        # FIXME: Under windows we get:
+                        # The process cannot access the file because it is being used by another process
+                        # See: https://github.com/peter-wangxu/persist-queue/issues/110
 
             print(f'total filesystem items: {self.total_count}')
             if self.resumed_processed_count:
