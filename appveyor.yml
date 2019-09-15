@@ -8,6 +8,9 @@ environment:
 
 build: off
 
+init:
+    - set PIPENV_IGNORE_VIRTUALENVS=1
+
 install:
     - pip install tox
 
