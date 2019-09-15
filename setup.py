@@ -7,6 +7,7 @@ import sys
 
 from setuptools import find_packages, setup
 
+# IterFilesystem
 from iterfilesystem import __version__
 
 PACKAGE_ROOT = os.path.dirname(os.path.abspath(__file__))

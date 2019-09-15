@@ -2,9 +2,12 @@
 import logging
 from pathlib import Path
 
+# https://github.com/peter-wangxu/persist-queue
+from persistqueue.sqlackqueue import AckStatus
+
+# IterFilesystem
 from iterfilesystem import ThreadedFilesystemWalker
 from iterfilesystem.iter_scandir import ScandirWalker
-from persistqueue.sqlackqueue import AckStatus
 
 
 class FilesystemInformation:

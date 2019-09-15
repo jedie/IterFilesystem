@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
+"""
+    Example CLI program
 
-'''
-This sample script will get deployed in the bin directory of the
-users' virtualenv when the parent module is installed using pip.
-'''
+    Will be "installed" by setup.py console_scripts / entry_points
+
+    e.g.:
+
+    (IterFilesystem) ~/IterFilesystem$ print_fs_stats --help
+"""
 
 import argparse
 import logging
@@ -12,6 +16,7 @@ import sys
 import traceback
 from pathlib import Path
 
+# IterFilesystem
 from iterfilesystem import get_module_version
 from iterfilesystem.example import CountFilesystemWalker
 from iterfilesystem.iter_scandir import ScandirWalker

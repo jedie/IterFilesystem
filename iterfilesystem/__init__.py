@@ -9,12 +9,16 @@ import threading
 import time
 from pathlib import Path
 
-from iterfilesystem.humanize import human_time
-from iterfilesystem.utils import left_shorten, string2hash
 # https://github.com/peter-wangxu/persist-queue
 from persistqueue import Empty
 from persistqueue.sqlackqueue import AckStatus, UniqueAckQ
+
+# https://github.com/tqdm/tqdm
 from tqdm import tqdm  # https://github.com/tqdm/tqdm
+
+# IterFilesystem
+from iterfilesystem.humanize import human_time
+from iterfilesystem.utils import left_shorten, string2hash
 
 __author__ = 'Jens Diemer'
 __email__ = 'python@jensdiemer.de'
