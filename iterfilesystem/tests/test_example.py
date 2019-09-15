@@ -30,9 +30,9 @@ class TestExample(BaseTestCase):
 
         walker.print_stats()
 
-        assert walker.fs_info.file_count >= 65
-        assert walker.fs_info.file_size > 800000
-        assert walker.fs_info.dir_count >= 10
+        assert walker.fs_info.file_count >= 20
+        assert walker.fs_info.file_size > 150000
+        assert walker.fs_info.dir_count >= 4
         assert walker.fs_info.other_count == 0
 
         seen_count = walker.fs_info.file_count + walker.fs_info.dir_count + walker.fs_info.other_count
