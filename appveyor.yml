@@ -6,13 +6,16 @@ environment:
         - TOXENV: py36
         - TOXENV: py37
 
-build: off
+build: false
 
 init:
     - set PIPENV_IGNORE_VIRTUALENVS=1
 
 install:
-    - pip install tox
+    - pip install -U tox appveyor-artifacts coveralls
 
 test_script:
     - tox
+
+artifacts:
+    - path: .coverage

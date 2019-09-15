@@ -14,6 +14,7 @@ Please: try, fork and contribute! ;)
 
 | {{https://travis-ci.org/jedie/IterFilesystem.svg|Build Status on travis-ci.org}} | [[https://travis-ci.org/jedie/IterFilesystem/|travis-ci.org/jedie/IterFilesystem]] |
 | {{https://ci.appveyor.com/api/projects/status/py5sl38ql3xciafc?svg=true|Build Status on appveyor.com}} | [[https://ci.appveyor.com/project/jedie/IterFilesystem/history|ci.appveyor.com/project/jedie/IterFilesystem]] |
+| {{https://codecov.io/gh/jedie/IterFilesystem/branch/master/graph/badge.svg|Coverage Status on codecov.io}} | [[https://codecov.io/gh/jedie/IterFilesystem|codecov.io/gh/jedie/IterFilesystem]] |
 | {{https://coveralls.io/repos/jedie/IterFilesystem/badge.svg|Coverage Status on coveralls.io}} | [[https://coveralls.io/r/jedie/IterFilesystem|coveralls.io/r/jedie/IterFilesystem]] |
 | {{https://requires.io/github/jedie/IterFilesystem/requirements.svg?branch=master|Requirements Status on requires.io}} | [[https://requires.io/github/jedie/IterFilesystem/requirements/|requires.io/github/jedie/IterFilesystem/requirements/]] |
 
@@ -79,7 +80,9 @@ Other count....: 0
 * **dev** - [[https://github.com/jedie/IterFilesystem/compare/v0.1.0...master|compare v0.1.0...master]]
 ** TBC
 * 15.09.2019 - [[https://github.com/jedie/IterFilesystem/compare/v0.0.1...v0.1.0|compare v0.0.1...v0.1.0]]
-** setup CI and fix tests
+** add some project meta files and tests
+** setup CI
+** fix tests
 * 15.09.2019 - v0.0.1
 ** first Release on PyPi
 

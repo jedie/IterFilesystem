@@ -1,17 +1,32 @@
 # Config file for automatic testing at travis-ci.org
-dist: xenial
+
 language: python
-cache: pip
+
 python:
-    - "3.7"
     - "3.6"
+#    - "3.7"
+
+sudo: false
+
+os:
+    # Python builds are not available on the OSX environment.
+    # see: https://docs.travis-ci.com/user/languages/python
+    #- osx
+    - linux
+
+virtualenv:
+    system_site_packages: false
+
+env:
+    global:
+        - PIPENV_VENV_IN_PROJECT=1
+        - PIPENV_IGNORE_VIRTUALENVS=1
 
 before_install:
-  - export PIPENV_IGNORE_VIRTUALENVS=1
-  - pip install -U pip
+    - pip install -U pip
 
 install:
-    - pip install -U tox-travis codecov
+    - pip install -U tox-travis appveyor-artifacts coveralls codecov
 
 script:
     - tox

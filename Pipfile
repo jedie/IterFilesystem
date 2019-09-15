@@ -12,8 +12,6 @@ coverage = "*"
 twine = "*"
 pytest = "*"
 pytest-cov = "*"
-pytest-raises = "*"
-pytest-runner = "*"
 python-creole = "*"
 
 [packages]
