@@ -1,76 +1,99 @@
+import hashlib
 import logging
 from pathlib import Path
 
 # IterFilesystem
-from iterfilesystem.example import count_filesystem
+import pytest
+
+from iterfilesystem.example import calc_sha512
 from iterfilesystem.tests import BaseTestCase
+from iterfilesystem.tests.test_utils import verbose_get_capsys
 
 
 class TestExample(BaseTestCase):
-    def test_count_filesystem(self, caplog):
+    def test_package_path(self, caplog, capsys):
         with caplog.at_level(logging.DEBUG):
-            walker = count_filesystem(
+            statistics = calc_sha512(
                 top_path=self.package_path,
                 skip_dirs=self.skip_dirs,
                 skip_filenames=self.skip_filenames,
-
-                force_restart=True,
-                complete_cleanup=True,
-
-                worker_count=3,
-
-                update_interval_sec=0.5
+                wait=True
             )
 
+        captured_out, captured_err = verbose_get_capsys(capsys)
+        assert 'SHA515 hash calculated over all file content:' in captured_out
+        assert 'Total file size:' in captured_out
+
         log_messages = '\n'.join([rec.message for rec in caplog.records])
+        print('_' * 100)
+        print('Captured logs:')
         print(log_messages)
+        print('-' * 100)
 
-        # FIXME: Failed on appveyor, see:
-        # https://ci.appveyor.com/project/jedie/iterfilesystem/builds/27420855/job/rcu9lwa4hd7gqjax#L95
-        # assert "persist data doesn't exists" in log_messages
+        statistics.print_stats()
 
-        assert "Skip file: '.gitignore'" in log_messages
-        assert "Skip dir: '.tox'" in log_messages
-        assert "Complete cleanup should be made" in log_messages
+        assert statistics.total_dir_item_count >= 40
+        assert statistics.dir_item_count >= 40
+        assert statistics.total_file_size > 55000
+        assert statistics.total_file_size_processed > 55000
 
-        walker.print_stats()
+    def test_not_existing_path(self):
+        with pytest.raises(NotADirectoryError):
+            calc_sha512(
+                top_path='/foo/bar/not/exists/',
+            )
 
-        assert walker.fs_info.file_count >= 20
-        assert walker.fs_info.file_size > 55000
-        assert walker.fs_info.dir_count >= 4
-        assert walker.fs_info.other_count == 0
-
-        seen_count = walker.fs_info.file_count + walker.fs_info.dir_count + walker.fs_info.other_count
-        assert seen_count == walker.total_count
-
-    def test_error_handling(self, tmp_path, caplog, capsys):
+    def test_hash(self, tmp_path):
+        hash = hashlib.sha512()
         for no in range(10):
-            with Path(tmp_path, f'working_file_{no}.txt').open("w") as f:
-                f.write(f'X{no}')
+            with Path(tmp_path, f'working_file_{no}.dat').open("wb") as f:
+                data = b'X%i' % no
+                f.write(data)
+                hash.update(data)
 
-        src_file = Path(tmp_path, "source_file.txt")
-        src_file.touch()
+        expected_hash = hash.hexdigest()
 
-        dst_file = Path(tmp_path, "destination.txt")
-        dst_file.symlink_to(src_file)
+        statistics = calc_sha512(
+            top_path=tmp_path
+        )
 
-        # Create a broken symlink, by deleting the source file:
-        src_file.unlink()
+        statistics.print_stats()
 
-        with caplog.at_level(logging.DEBUG):
-            walker = count_filesystem(top_path=tmp_path)
+        assert statistics.hash == expected_hash
 
-        captured = capsys.readouterr()
-        print(captured.out)
-
-        walker.print_stats()
-
-        assert 'Read filesystem with 11 items' in captured.out
-
-        assert walker.fs_info.file_count == 10
-        assert walker.fs_info.file_size == 20
-        assert walker.fs_info.dir_count == 0
-        assert walker.fs_info.other_count == 1  # the broken symlink
-
-        seen_count = walker.fs_info.file_count + walker.fs_info.dir_count + walker.fs_info.other_count
-        assert seen_count == walker.total_count
+        assert statistics.total_dir_item_count == 10
+        assert statistics.dir_item_count == 10
+        assert statistics.total_file_size == 20
+        assert statistics.total_file_size_processed == 20
+    #
+    # def test_error_handling(self, tmp_path, caplog, capsys):
+    #     for no in range(10):
+    #         with Path(tmp_path, f'working_file_{no}.txt').open("w") as f:
+    #             f.write(f'X{no}')
+    #
+    #     src_file = Path(tmp_path, "source_file.txt")
+    #     src_file.touch()
+    #
+    #     dst_file = Path(tmp_path, "destination.txt")
+    #     dst_file.symlink_to(src_file)
+    #
+    #     # Create a broken symlink, by deleting the source file:
+    #     src_file.unlink()
+    #
+    #     with caplog.at_level(logging.DEBUG):
+    #         walker = count_filesystem(top_path=tmp_path)
+    #
+    #     captured = capsys.readouterr()
+    #     print(captured.out)
+    #
+    #     walker.print_stats()
+    #
+    #     assert 'Read filesystem with 11 items' in captured.out
+    #
+    #     assert walker.fs_info.file_count == 10
+    #     assert walker.fs_info.file_size == 20
+    #     assert walker.fs_info.dir_count == 0
+    #     assert walker.fs_info.other_count == 1  # the broken symlink
+    #
+    #     seen_count = walker.fs_info.file_count + walker.fs_info.dir_count + walker.fs_info.other_count
+    #     assert seen_count == walker.total_count
