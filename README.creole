@@ -70,9 +70,9 @@ No files will be skipped.
 
 ...
 
-Filesystem items..: 100%|███████████████████████████████████████████████████████████████████████████|633/633 13185.18entries/s [00:00<00:00, 13185.18entries/s]
-File sizes........: 100%|██████████████████████████████████████████████████████████████████████████████████████████████|2.22M/2.22M [00:00<00:00, 48.6MBytes/s]
-Average progress..: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████|00:00<00:00
+Filesystem items..: 100%|██████████████████████████████████████████|633/633 13185.18entries/s [00:00<00:00, 13185.18entries/s]
+File sizes........: 100%|█████████████████████████████████████████████████████████████|2.22M/2.22M [00:00<00:00, 48.6MBytes/s]
+Average progress..: 100%|████████████████████████████████████████████████████████████████████████████████████████|00:00<00:00
 Current File......:, ~/repos/IterFilesystem/Pipfile
 
 Processed 633 filesystem items in 0.06 sec
@@ -84,12 +84,13 @@ Total file size: 2.2 MB
 
 == History
 
-* **dev** - [[https://github.com/jedie/IterFilesystem/compare/v0.2.0...master|compare v0.2.0...master]]
+* **dev** - [[https://github.com/jedie/IterFilesystem/compare/v1.0.0...master|compare v1.0.0...master]]
+** TBC
+* 12.10.2019 - [[https://github.com/jedie/IterFilesystem/compare/v0.2.0...v1.0.0|compare v0.2.0...v1.0.0]]
 ** refactoring:
 *** don't use {{{persist-queue}}}
 *** switch from threading to multiprocessing
 *** enhance progress display with multiple {{{tqdm}}} process bars
-** TBC
 * 15.09.2019 - [[https://github.com/jedie/IterFilesystem/compare/v0.1.0...v0.2.0|compare v0.1.0...v0.2.0]]
 ** store persist queue in temp directory
 ** Don't catch {{{process_path_item}}} errors, this should be made in child class
@@ -99,6 +100,7 @@ Total file size: 2.2 MB
 ** fix tests
 * 15.09.2019 - v0.0.1
 ** first Release on PyPi
+
 
 == Links
 
