@@ -2,11 +2,11 @@
 
 Multiprocess directory iteration via {{{os.scandir()}}}:
 
- * "stats" processes:
-    * only counts up all directories and files.
-    * accumulates the sizes of all files.
- * "worker" process:
-    * Filesystem walk and process the real action with dir/files
+* "stats" processes:
+** only counts up all directories and files.
+** accumulates the sizes of all files.
+* "worker" process:
+** Filesystem walk and process the real action with dir/files
 
 among other things these packages are used:
  * progress bar [[https://pypi.org/project/tqdm/|tqdm]]
