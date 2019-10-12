@@ -1,9 +1,14 @@
 == IterFilesystem
 
-Threaded directory iteration via {{{os.scandir()}}} with progress indicator and resume function.
+Multiprocess directory iteration via {{{os.scandir()}}}:
+
+ * "stats" processes:
+    * only counts up all directories and files.
+    * accumulates the sizes of all files.
+ * "worker" process:
+    * Filesystem walk and process the real action with dir/files
 
 among other things these packages are used:
- * {{{UniqueAckQ}}} from [[https://pypi.org/project/persist-queue/|persist-queue]]
  * progress bar [[https://pypi.org/project/tqdm/|tqdm]]
 
 Requirement:
@@ -29,10 +34,14 @@ Use example CLI, e.g.:
 ~/IterFilesystem$ pipenv install
 ~/IterFilesystem$ pipenv shell
 (IterFilesystem) ~/IterFilesystem$ print_fs_stats --help
+(IterFilesystem) ~/IterFilesystem$ pip install -e .
+...
+Successfully installed iterfilesystem
+
+(IterFilesystem) ~/IterFilesystem$ $ print_fs_stats --help
 usage: print_fs_stats.py [-h] [-v] [--path PATH]
                          [--skip_dirs [SKIP_DIRS [SKIP_DIRS ...]]]
                          [--skip_filenames [SKIP_FILENAMES [SKIP_FILENAMES ...]]]
-                         [--force_restart] [--complete_cleanup]
 
 Scan filesystem and print some information
 
@@ -45,39 +54,41 @@ optional arguments:
                         Directory names to exclude from scan.
   --skip_filenames [SKIP_FILENAMES [SKIP_FILENAMES ...]]
                         File names to ignore.
-  --force_restart       Don't use resume data: Delete persist queue data
-                        before start.
-  --complete_cleanup    Delete persist queue after complete scan.
 }}}
 
 example output looks like this:
 
 {{{
 (IterFilesystem) ~/IterFilesystem$ $ print_fs_stats --path ~/IterFilesystem --skip_dirs .tox .pytest_cache
-Read/process: '/home/foobar/IterFilesystem'...
+$ print_fs_stats --path ~/repos/IterFilesystem --skip_dirs .tox .pytest_cache
+Read/process: '~/repos/IterFilesystem'...
 Skip directories:
 	* .tox
 	* .pytest_cache
 
-[INFO:  61 2019-09-15 12:37:17,973] Save persist queue to: /home/foobar/IterFilesystem/persisted_queue_4Aubn
-[INFO:  37 2019-09-15 12:37:18,252] Skip dir: '.idea'
-[INFO:  37 2019-09-15 12:37:18,252] Skip dir: '.tox'
-[INFO:  37 2019-09-15 12:37:18,270] Skip dir: '.pytest_cache'
-Read filesystem with 83 items in 0.3sec.
-*** all items processed ***: 100%|████████████████████████████████████| 83/83 [00:00<00:00, 85.25it/s]
+No files will be skipped.
 
-total filesystem items: 83
-Finish in.............: 1.0sec.
-File count.....: 73 with 10991860 Bytes
-Directory count: 10
-Other count....: 0
+...
+
+Filesystem items..: 100%|███████████████████████████████████████████████████████████████████████████|633/633 13185.18entries/s [00:00<00:00, 13185.18entries/s]
+File sizes........: 100%|██████████████████████████████████████████████████████████████████████████████████████████████|2.22M/2.22M [00:00<00:00, 48.6MBytes/s]
+Average progress..: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████|00:00<00:00
+Current File......:, ~/repos/IterFilesystem/Pipfile
+
+Processed 633 filesystem items in 0.06 sec
+SHA515 hash calculated over all file content: 79f2b0587e147b1c7d8581ea3597039a9e6d0c79ff10ea3bfd499cc60bc48892507437dd00da3c311280b4305c75459dbb122ebbec6b3b0445ce595b47c9f4a8
+File count: 428
+Total file size: 2.2 MB
 }}}
-
 
 
 == History
 
 * **dev** - [[https://github.com/jedie/IterFilesystem/compare/v0.2.0...master|compare v0.2.0...master]]
+** refactoring:
+*** don't use {{{persist-queue}}}
+*** switch from threading to multiprocessing
+*** enhance progress display with multiple {{{tqdm}}} process bars
 ** TBC
 * 15.09.2019 - [[https://github.com/jedie/IterFilesystem/compare/v0.1.0...v0.2.0|compare v0.1.0...v0.2.0]]
 ** store persist queue in temp directory

@@ -18,12 +18,10 @@ from pathlib import Path
 
 # IterFilesystem
 from iterfilesystem import get_module_version
-from iterfilesystem.example import CountFilesystemWalker
-from iterfilesystem.iter_scandir import ScandirWalker
+from iterfilesystem.example import calc_sha512
+from iterfilesystem.process_bar import Printer
 
 log = logging.getLogger()
-logging.basicConfig(level=logging.INFO,
-                    format='[%(levelname)4s:%(lineno)4s %(asctime)s] %(message)s')
 
 
 def main(*args):
@@ -40,7 +38,7 @@ def main(*args):
         '--debug',
         action='store_true',
         dest='debug',
-        help=argparse.SUPPRESS
+        help='enable DEBUG'
     )
     parser.add_argument(
         '--path',
@@ -59,16 +57,6 @@ def main(*args):
         nargs='*',
         help='File names to ignore.'
     )
-    parser.add_argument(
-        '--force_restart',
-        action='store_true',
-        help="Don't use resume data: Delete persist queue data before start."
-    )
-    parser.add_argument(
-        '--complete_cleanup',
-        action='store_true',
-        help="Delete persist queue after complete scan."
-    )
 
     if args:
         print(f'Use args: {args!r}')
@@ -78,45 +66,40 @@ def main(*args):
     args = parser.parse_args(args)
 
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
+        log_level = logging.DEBUG
+    else:
+        log_level = logging.ERROR
+
+    logging.basicConfig(
+        level=log_level,
+        format='[%(processName)s %(levelname)4s:%(lineno)4s %(asctime)s] %(message)s',
+        stream=Printer
+    )
 
     try:
-        scandir_walker = ScandirWalker(
+        statistics = calc_sha512(
             top_path=args.path,
             skip_dirs=args.skip_dirs,
             skip_filenames=args.skip_filenames,
         )
-        walker = CountFilesystemWalker(
-            scandir_walker=scandir_walker,
-            force_restart=args.force_restart,
-            complete_cleanup=args.complete_cleanup,
-        )
-
-        try:
-            walker.scandir()
-        except KeyboardInterrupt:
-            pass  # print stats after Strg-C
-
-        walker.print_stats()
-
-        # # Do your work here - preferably in a class or function,
-        # # passing in your args. E.g.
-        # exe = Example(args.first)
-        # exe.update_value(args.second)
-        # print('First : {}\nSecond: {}'.format(exe.get_value(), exe.get_previous_value()))
-
-    except Exception as e:
-        log.error('=============================================')
         if args.debug:
-            log.error('\n\n' + traceback.format_exc())
-            log.error('=============================================')
-        log.error('\n\n' + str(e) + '\n')
-        log.error('=============================================')
+            print('\ndebug statistics:')
+            statistics.print_stats()
+        print()
+    except NotADirectoryError as err:
+        print(f'ERROR: {err}')
         sys.exit(1)
+    except Exception as err:
+        print('=' * 100, file=sys.stderr)
+        if args.debug:
+            print(traceback.format_exc(), file=sys.stderr)
+            print('=' * 100, file=sys.stderr)
+        print(err, file=sys.stderr)
+        print('=' * 100, file=sys.stderr)
+        sys.exit(-1)
 
 
 ###############################################################################
 # Allow caller to directly run this module (usually in development scenarios)
-
 if __name__ == '__main__':
     main()

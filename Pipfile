@@ -16,7 +16,6 @@ python-creole = "*"
 
 [packages]
 tqdm = "*"
-persist-queue = "*"
 
 [requires]
 python_version = "3.6"

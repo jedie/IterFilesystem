@@ -1,91 +1,101 @@
 #!/usr/bin/env python3
-import logging
-from pathlib import Path
 
-# https://github.com/peter-wangxu/persist-queue
-from persistqueue.sqlackqueue import AckStatus
+import hashlib
+from pathlib import Path
+from timeit import default_timer
 
 # IterFilesystem
-from iterfilesystem import ThreadedFilesystemWalker
+from iterfilesystem.humanize import human_filesize
 from iterfilesystem.iter_scandir import ScandirWalker
-
-log = logging.getLogger()
-
-
-class FilesystemInformation:
-    file_count = 0
-    file_size = 0
-    dir_count = 0
-    other_count = 0
+from iterfilesystem.main import FilesystemBaseWorker, FilesystemWorker
+from iterfilesystem.process_bar import FileProcessingTqdm
+from iterfilesystem.utils import UpdateInterval
 
 
-class CountFilesystemWalker(ThreadedFilesystemWalker):
+class CalcSHA512Worker(FilesystemBaseWorker):
     def __init__(self, *args, **kwargs):
-        self.fs_info = FilesystemInformation()
         super().__init__(*args, **kwargs)
 
-    def process_path_item(self, path):
-        try:
-            fs_item = Path(path)
-            with self.lock:
-                if fs_item.is_dir():
-                    self.fs_info.dir_count += 1
-                elif fs_item.is_file():
-                    self.fs_info.file_size += fs_item.stat().st_size
-                    self.fs_info.file_count += 1
-                else:
-                    self.fs_info.other_count += 1
-        except OSError:
-            log.exception('error process path item')
-            return AckStatus.ack_failed
+        self.hash = hashlib.sha512()
+        self.process_bar = FileProcessingTqdm()
+        self.update_interval = UpdateInterval(interval=self.update_interval_sec)
+
+    def process(self, *, dir_entry):
+        if not dir_entry.is_file(follow_symlinks=False):
+            # Skip all non files
+            return
+
+        total_file_size = dir_entry.stat().st_size
+        big_file = total_file_size > 10 * 1024 * 1024
+
+        if big_file:
+            self.process_bar.desc = f'Calc SHA512 for "{dir_entry.name}"'
+            self.process_bar.reset(total=dir_entry.stat().st_size)
+
+        with Path(dir_entry).open('rb') as f:
+            processed_size = 0
+            while True:
+                data = f.read(100000)
+                if not data:
+                    break
+                self.hash.update(data)
+
+                processed_size += len(data)
+
+                if big_file and self.update_interval:
+                    self.process_bar.update(processed_size)
+                    self.update(dir_entry=dir_entry, file_size=processed_size)
+                    processed_size = 0
+
+        if big_file:
+            self.process_bar.update(processed_size)
+            self.update(dir_entry=dir_entry, file_size=processed_size)
         else:
-            return AckStatus.acked
+            # Always update the global statistics / process bars:
+            self.update(dir_entry=dir_entry, file_size=total_file_size)
 
-    def print_stats(self):
-        print(f'File count.....: {self.fs_info.file_count} with {self.fs_info.file_size} Bytes')
-        print(f'Directory count: {self.fs_info.dir_count}')
-        print(f'Other count....: {self.fs_info.other_count}')
+    def done(self):
+        self.process_bar.close()
 
-        seen_count = self.fs_info.file_count + self.fs_info.dir_count + self.fs_info.other_count
-        if seen_count != self.total_count:
-            print("NOTE: not all collected!")
+        self.statistics.hash = self.hash.hexdigest()  # transfer to main process
+        super().done()  # transfer statistics from worker process to main process
 
 
-def count_filesystem(top_path, skip_dirs=(), skip_filenames=(), **kwargs):
-    scandir_walker = ScandirWalker(
-        top_path=Path(top_path).expanduser(),
-        skip_dirs=skip_dirs,
-        skip_filenames=skip_filenames,
+def calc_sha512(*, top_path, skip_dirs=(), skip_filenames=(), wait=False):
+    fs_worker = FilesystemWorker(
+        ScanDirClass=ScandirWalker,
+        scan_dir_kwargs=dict(
+            top_path=top_path,
+            skip_dirs=skip_dirs,
+            skip_filenames=skip_filenames,
+        ),
+        WorkerClass=CalcSHA512Worker,
+        update_interval_sec=0.5,
+        wait=wait
     )
-    walker = CountFilesystemWalker(scandir_walker=scandir_walker, **kwargs)
 
-    try:
-        walker.scandir()
-    except KeyboardInterrupt:
-        pass  # print stats after Strg-C
+    start_time = default_timer()
+    statistics = fs_worker.process()
+    duration = default_timer() - start_time
 
-    return walker
+    print('\n\n')
+    print(f'Processed {statistics.total_dir_item_count} filesystem items in {duration:.2f} sec')
+    print(f'SHA515 hash calculated over all file content: {statistics.hash}')
+    print(f'File count: {statistics.file_count}')
+    print(f'Total file size: {human_filesize(statistics.total_file_size)}')
+
+    return statistics
 
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.INFO
-        # level=logging.DEBUG
+    statistics = calc_sha512(
+        top_path='/foo/bar/',
+        # top_path='~',
+        # top_path='~/bin',
+        skip_dirs=('.config', '.local', 'temp', '__cache__'),
+        skip_filenames=('temp',),
     )
 
-    walker = count_filesystem(
-        top_path='~/bin',
+    print(statistics.pformat())
 
-        skip_dirs=('.config', '.local'),
-        skip_filenames=('meld', 'aw-qt'),
-
-        # force_restart=True,
-        force_restart=False,
-
-        complete_cleanup=True,
-
-        worker_count=3,
-
-        update_interval_sec=0.5
-    )
-    walker.print_stats()
+    # calc_sha512(path='~/Downloads')
