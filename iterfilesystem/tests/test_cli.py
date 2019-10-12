@@ -42,8 +42,8 @@ class TestCli(BaseTestCase):
     def test_cli_scan(self, capsys):
         main(
             '--path', str(self.package_path),
-            '--skip_dirs', *self.skip_dirs,
-            '--skip_filenames', *self.skip_filenames,
+            '--skip_dir_patterns', *self.skip_dir_patterns,
+            '--skip_file_patterns', *self.skip_file_patterns,
             '--debug'
         )
 

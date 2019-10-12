@@ -57,17 +57,18 @@ class CalcSHA512Worker(FilesystemBaseWorker):
     def done(self):
         self.process_bar.close()
 
-        self.statistics.hash = self.hash.hexdigest()  # transfer to main process
-        super().done()  # transfer statistics from worker process to main process
+        self.statistics.hash = self.hash.hexdigest()  # Just add hash to statistics ;)
+
+        return super().done()  # return the statistics
 
 
-def calc_sha512(*, top_path, skip_dirs=(), skip_filenames=(), wait=False):
+def calc_sha512(*, top_path, skip_dir_patterns=(), skip_file_patterns=(), wait=False):
     fs_worker = FilesystemWorker(
         ScanDirClass=ScandirWalker,
         scan_dir_kwargs=dict(
             top_path=top_path,
-            skip_dirs=skip_dirs,
-            skip_filenames=skip_filenames,
+            skip_dir_patterns=skip_dir_patterns,
+            skip_file_patterns=skip_file_patterns,
         ),
         WorkerClass=CalcSHA512Worker,
         update_interval_sec=0.5,
@@ -84,16 +85,22 @@ def calc_sha512(*, top_path, skip_dirs=(), skip_filenames=(), wait=False):
     print(f'File count: {statistics.file_count}')
     print(f'Total file size: {human_filesize(statistics.total_file_size)}')
 
+    if skip_dir_patterns:
+        print(f'{statistics.skip_dir_count} directories skipped.')
+
+    if skip_file_patterns:
+        print(f'{statistics.skip_file_count} files skipped.')
+
     return statistics
 
 
 if __name__ == '__main__':
     statistics = calc_sha512(
-        top_path='/foo/bar/',
-        # top_path='~',
+        # top_path='/foo/bar/',
+        top_path='~',
         # top_path='~/bin',
-        skip_dirs=('.config', '.local', 'temp', '__cache__'),
-        skip_filenames=('temp',),
+        skip_dir_patterns=('.config', '.local', 'temp', '__cache__'),
+        skip_file_patterns=('*.temp', '*.egg-info'),
     )
 
     print(statistics.pformat())

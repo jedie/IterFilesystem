@@ -2,9 +2,9 @@ import hashlib
 import logging
 from pathlib import Path
 
-# IterFilesystem
 import pytest
 
+# IterFilesystem
 from iterfilesystem.example import calc_sha512
 from iterfilesystem.tests import BaseTestCase
 from iterfilesystem.tests.test_utils import verbose_get_capsys
@@ -15,8 +15,8 @@ class TestExample(BaseTestCase):
         with caplog.at_level(logging.DEBUG):
             statistics = calc_sha512(
                 top_path=self.package_path,
-                skip_dirs=self.skip_dirs,
-                skip_filenames=self.skip_filenames,
+                skip_dir_patterns=self.skip_dir_patterns,
+                skip_file_patterns=self.skip_file_patterns,
                 wait=True
             )
 
@@ -65,35 +65,3 @@ class TestExample(BaseTestCase):
         assert statistics.dir_item_count == 10
         assert statistics.total_file_size == 20
         assert statistics.total_file_size_processed == 20
-    #
-    # def test_error_handling(self, tmp_path, caplog, capsys):
-    #     for no in range(10):
-    #         with Path(tmp_path, f'working_file_{no}.txt').open("w") as f:
-    #             f.write(f'X{no}')
-    #
-    #     src_file = Path(tmp_path, "source_file.txt")
-    #     src_file.touch()
-    #
-    #     dst_file = Path(tmp_path, "destination.txt")
-    #     dst_file.symlink_to(src_file)
-    #
-    #     # Create a broken symlink, by deleting the source file:
-    #     src_file.unlink()
-    #
-    #     with caplog.at_level(logging.DEBUG):
-    #         walker = count_filesystem(top_path=tmp_path)
-    #
-    #     captured = capsys.readouterr()
-    #     print(captured.out)
-    #
-    #     walker.print_stats()
-    #
-    #     assert 'Read filesystem with 11 items' in captured.out
-    #
-    #     assert walker.fs_info.file_count == 10
-    #     assert walker.fs_info.file_size == 20
-    #     assert walker.fs_info.dir_count == 0
-    #     assert walker.fs_info.other_count == 1  # the broken symlink
-    #
-    #     seen_count = walker.fs_info.file_count + walker.fs_info.dir_count + walker.fs_info.other_count
-    #     assert seen_count == walker.total_count

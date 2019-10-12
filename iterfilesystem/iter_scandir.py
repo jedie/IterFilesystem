@@ -1,20 +1,29 @@
+import fnmatch
 import logging
 import os
 from pathlib import Path
+from timeit import default_timer
 
 log = logging.getLogger()
 
 
 class ScandirWalker:
-    def __init__(self, *, top_path, statistics, skip_dirs=(), skip_filenames=(), verbose=True):
+    def __init__(
+            self,
+            *,
+            top_path,
+            statistics,
+            skip_dir_patterns=(),
+            skip_file_patterns=(),
+            verbose=True):
         self.verbose = verbose
         self.top_path = self.get_top_path(top_path)
         self.statistics = statistics
-        self.skip_dirs = self.get_skip_dirs(skip_dirs)
-        self.skip_filenames = self.get_skip_filenames(skip_filenames)
+        self.skip_dir_patterns = self.get_skip_dir_patterns(skip_dir_patterns)
+        self.skip_file_patterns = self.get_skip_file_patterns(skip_file_patterns)
 
     ##############################################################################################
-    # These methods should be overwritten:
+    # These methods may be overwritten:
 
     def get_top_path(self, top_path):
         if self.verbose:
@@ -24,36 +33,42 @@ class ScandirWalker:
             raise NotADirectoryError(f'Directory does not exists: {top_path}')
         return top_path
 
-    def get_skip_dirs(self, skip_dirs):
+    def get_pattern(self, kind, skip_patterns):
         if self.verbose:
-            if skip_dirs:
-                print('Skip directories:')
-                print('\t* ' + '\n\t* '.join(skip_dirs))
+            if skip_patterns:
+                print(f'Skip {kind} patterns:')
+                print('\t* ' + '\n\t* '.join(skip_patterns))
                 print()
             else:
-                print('No directories will be skipped.')
-        return skip_dirs
+                print(f'No skip {kind} patterns, ok.')
+        return skip_patterns
 
-    def get_skip_filenames(self, skip_filenames):
-        if self.verbose:
-            if skip_filenames:
-                print('Skip files:')
-                print('\t* ' + '\n\t* '.join(skip_filenames))
-                print()
-            else:
-                print('No files will be skipped.')
-        return skip_filenames
+    def get_skip_dir_patterns(self, skip_dir_patterns):
+        return self.get_pattern(kind='directory', skip_patterns=skip_dir_patterns)
+
+    def get_skip_file_patterns(self, skip_file_patterns):
+        return self.get_pattern(kind='file', skip_patterns=skip_file_patterns)
 
     def on_skip_dir(self, dir_entry):
-        log.info('Skip dir: %r', dir_entry.name)
+        pass
 
     def on_skip_file(self, dir_entry):
-        log.info('Skip file: %r', dir_entry.name)
+        pass
 
     ##############################################################################################
 
+    def fnmatches(self, dir_item_name, patterns):
+        for skip_pattern in patterns:
+            if fnmatch.fnmatch(dir_item_name, skip_pattern):
+                return True
+        return False
+
     def __iter__(self):
+        start_time = default_timer()
+
         yield from self._iter_scandir(path=self.top_path)
+
+        self.statistics.scan_duration = default_timer() - start_time
 
     def _iter_scandir(self, path):
         try:
@@ -65,7 +80,7 @@ class ScandirWalker:
         for dir_entry in dir_entry_iterator:
             self.statistics.dir_item_count += 1
             if dir_entry.is_dir(follow_symlinks=False):
-                if dir_entry.name in self.skip_dirs:
+                if self.fnmatches(dir_item_name=dir_entry.name, patterns=self.skip_dir_patterns):
                     self.statistics.skip_dir_count += 1
                     self.on_skip_dir(dir_entry)
                 else:
@@ -73,7 +88,7 @@ class ScandirWalker:
                     yield dir_entry
                     yield from self._iter_scandir(dir_entry.path)
             else:
-                if dir_entry.name in self.skip_filenames:
+                if self.fnmatches(dir_item_name=dir_entry.name, patterns=self.skip_file_patterns):
                     self.statistics.skip_file_count += 1
                     self.on_skip_file(dir_entry)
                 else:
