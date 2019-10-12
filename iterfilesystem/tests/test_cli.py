@@ -1,6 +1,11 @@
+import sys
+
 import pytest
+
+# IterFilesystem
 from iterfilesystem.bin.print_fs_stats import main
 from iterfilesystem.tests import BaseTestCase
+from iterfilesystem.tests.test_utils import verbose_get_capsys
 
 
 class TestCli(BaseTestCase):
@@ -9,32 +14,40 @@ class TestCli(BaseTestCase):
         with pytest.raises(SystemExit) as pytest_wrapped_e:
             main('--help')
 
-        captured = capsys.readouterr()
-        assert 'usage: print_fs_stats.py' in captured.out
-        assert captured.err == ''
+        captured_out, captured_err = verbose_get_capsys(capsys)
+        assert 'usage: print_fs_stats.py' in captured_out
+        assert captured_err == ''
 
         assert pytest_wrapped_e.value.code == 0
 
+    def test_cli_not_existing_directory(self, capsys):
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            main(
+                '--path', '/foo/bar/does/not/exists',
+            )
+
+        captured_out, captured_err = verbose_get_capsys(capsys)
+
+        assert "Read/process: '/foo/bar/does/not/exists'..." in captured_out
+        if sys.platform == 'win32':
+            assert (
+                "ERROR: Directory does not exists: C:\\foo\\bar\\does\\not\\exists"
+            ) in captured_out
+        else:
+            assert "ERROR: Directory does not exists: /foo/bar/does/not/exists" in captured_out
+        assert captured_err == ''
+
+        assert pytest_wrapped_e.value.code == 1
+
     def test_cli_scan(self, capsys):
         main(
-            '--force_restart',
-            '--complete_cleanup',
+            '--path', str(self.package_path),
             '--skip_dirs', *self.skip_dirs,
             '--skip_filenames', *self.skip_filenames,
-            '--path', str(self.package_path)
+            '--debug'
         )
 
-        captured = capsys.readouterr()
+        captured_out, captured_err = verbose_get_capsys(capsys)
 
-        print(captured.out)
-        assert 'usage: print_fs_stats.py' not in captured.out
-        assert 'Force restart, by delete old persist queue data.' in captured.out
-        assert 'total filesystem items' in captured.out
-        assert 'Directory count' in captured.out
-        assert 'Remove persist data' in captured.out
-
-        print(captured.err)
-        assert '00 worker thread empty: 100%' in captured.err
-        assert '01 worker thread empty: 100%' in captured.err
-        assert '02 worker thread empty: 100%' in captured.err
-        assert '*** all items processed ***: 100%' in captured.err
+        assert 'usage: print_fs_stats.py' not in captured_out
+        assert 'hash: ' in captured_out
