@@ -46,13 +46,13 @@ def main(*args):
         default=Path('~')
     )
     parser.add_argument(
-        '--skip_dirs',
+        '--skip_dir_patterns',
         default=(),
         nargs='*',
         help='Directory names to exclude from scan.'
     )
     parser.add_argument(
-        '--skip_filenames',
+        '--skip_file_patterns',
         default=(),
         nargs='*',
         help='File names to ignore.'
@@ -79,8 +79,8 @@ def main(*args):
     try:
         statistics = calc_sha512(
             top_path=args.path,
-            skip_dirs=args.skip_dirs,
-            skip_filenames=args.skip_filenames,
+            skip_dir_patterns=args.skip_dir_patterns,
+            skip_file_patterns=args.skip_file_patterns,
         )
         if args.debug:
             print('\ndebug statistics:')

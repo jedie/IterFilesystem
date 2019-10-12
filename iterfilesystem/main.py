@@ -1,5 +1,4 @@
 import logging
-import multiprocessing
 from multiprocessing import Manager, Process
 from timeit import default_timer
 
@@ -89,22 +88,8 @@ class FilesystemWorker:
         )
 
     def process(self):
-        stats_queue = multiprocessing.SimpleQueue()
         with Manager() as manager:
             multiprocessing_stats = manager.dict()
-
-            worker_process = Process(
-                target=build_worker,
-                kwargs=dict(
-                    ScanDirClass=self.ScanDirClass,
-                    scan_dir_kwargs=self.scan_dir_kwargs,
-                    WorkerClass=self.WorkerClass,
-                    stats_queue=stats_queue,
-                    multiprocessing_stats=multiprocessing_stats,
-                    update_interval_sec=self.update_interval_sec,
-                )
-            )
-            worker_process.start()
 
             collect_counts_process = Process(
                 target=self.collect_counts,
@@ -118,7 +103,19 @@ class FilesystemWorker:
             )
             collect_size_process.start()
 
-            worker_process.join()
+            self.scan_dir_kwargs.update(dict(
+                verbose=True,
+                statistics=Statistics()
+            ))
+            with FilesystemWorkerProcessBar() as process_bar:
+                worker = self.WorkerClass(
+                    process_bar=process_bar,
+                    scan_dir_walker=self.ScanDirClass(**self.scan_dir_kwargs),
+                    multiprocessing_stats=multiprocessing_stats,
+                    update_interval_sec=self.update_interval_sec,
+                )
+                worker.start()
+            statistics = worker.done()
 
             if self.wait:
                 # In tests we would like to see all results
@@ -129,7 +126,6 @@ class FilesystemWorker:
                 collect_size_process.terminate()
                 collect_counts_process.terminate()
 
-        statistics = stats_queue.get()  # get statistics from worker process
         return statistics
 
 
@@ -139,12 +135,10 @@ class FilesystemBaseWorker:
             *,
             process_bar,
             scan_dir_walker,
-            stats_queue,
             multiprocessing_stats,
             update_interval_sec):
         self._process_bar = process_bar
         self.scan_dir_walker = scan_dir_walker
-        self.stats_queue = stats_queue
         self.multiprocessing_stats = multiprocessing_stats
         self.update_interval_sec = update_interval_sec
         self._update_interval = UpdateInterval(interval=self.update_interval_sec)
@@ -189,33 +183,7 @@ class FilesystemBaseWorker:
 
     def done(self):
         """
-        transfer statistics from worker process to main process
-
-        Can be overwritten but should be called via super() ;)
+        Can be overwritten but statistics should be returned!
         """
         self.statistics.done()
-        self.stats_queue.put(self.statistics)
-
-
-def build_worker(*, ScanDirClass,
-                 scan_dir_kwargs,
-                 WorkerClass,
-                 stats_queue,
-                 multiprocessing_stats,
-                 update_interval_sec):
-
-    scan_dir_kwargs.update(dict(
-        verbose=True,
-        statistics=Statistics()
-    ))
-
-    with FilesystemWorkerProcessBar() as process_bar:
-        worker = WorkerClass(
-            process_bar=process_bar,
-            scan_dir_walker=ScanDirClass(**scan_dir_kwargs),
-            stats_queue=stats_queue,
-            multiprocessing_stats=multiprocessing_stats,
-            update_interval_sec=update_interval_sec,
-        )
-        worker.start()
-    worker.done()
+        return self.statistics
