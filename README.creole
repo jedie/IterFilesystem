@@ -90,24 +90,29 @@ Total file size: 843.5 KB
 
 == History
 
-* **dev** - [[https://github.com/jedie/IterFilesystem/compare/v1.1.0...master|compare v1.1.0...master]]
+* [[https://github.com/jedie/IterFilesystem/compare/v1.2.0...master|**dev** - compare v1.2.0...master]]
 ** TBC
-* 12.10.2019 - [[https://github.com/jedie/IterFilesystem/compare/v1.0.0...v1.1.0|compare v1.0.0...v1.1.0]]
+* [[https://github.com/jedie/IterFilesystem/compare/v1.1.0...v1.2.0|13.10.2019 - v1.2.0]]
+** Refactor API
+** cleanup statistics and process bar
+** handle access errors like: //Permission denied//
+** fix tests
+* [[https://github.com/jedie/IterFilesystem/compare/v1.0.0...v1.1.0|12.10.2019 - v1.1.0]]
 ** don't create separate process for worker: Just do the work in main process
 ** dir/file filter uses now {{{fnmatch}}}
-* 12.10.2019 - [[https://github.com/jedie/IterFilesystem/compare/v0.2.0...v1.0.0|compare v0.2.0...v1.0.0]]
+* [[https://github.com/jedie/IterFilesystem/compare/v0.2.0...v1.0.0|12.10.2019 - v1.0.0]]
 ** refactoring:
 *** don't use {{{persist-queue}}}
 *** switch from threading to multiprocessing
 *** enhance progress display with multiple {{{tqdm}}} process bars
-* 15.09.2019 - [[https://github.com/jedie/IterFilesystem/compare/v0.1.0...v0.2.0|compare v0.1.0...v0.2.0]]
+* [[https://github.com/jedie/IterFilesystem/compare/v0.1.0...v0.2.0|15.09.2019 - v0.2.0]]
 ** store persist queue in temp directory
 ** Don't catch {{{process_path_item}}} errors, this should be made in child class
-* 15.09.2019 - [[https://github.com/jedie/IterFilesystem/compare/v0.0.1...v0.1.0|compare v0.0.1...v0.1.0]]
+* [[https://github.com/jedie/IterFilesystem/compare/v0.0.1...v0.1.0|15.09.2019 - v0.1.0]]
 ** add some project meta files and tests
 ** setup CI
 ** fix tests
-* 15.09.2019 - v0.0.1
+* [[https://github.com/jedie/IterFilesystem/commit/db89a467a548a969d9d2cdd48adb92114a8833fe|15.09.2019 - v0.0.1]]
 ** first Release on PyPi
 
 
