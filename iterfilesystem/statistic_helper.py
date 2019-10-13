@@ -20,7 +20,7 @@ class StatisticHelper:
         self.walker_file_count = 0
         self.walker_file_skip_count = 0
 
-        # from collect_counts_process:
+        # from collect_count_process:
         self.collect_dir_item_count = 0
         self.collect_dir_item_count_done = False
         self.collect_dir_item_duration = None

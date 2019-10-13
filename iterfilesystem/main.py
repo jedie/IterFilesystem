@@ -98,16 +98,18 @@ class IterFilesystem:
             self.multiprocessing_stats = manager.dict()
 
             collect_size_process = None
-            collect_counts_process = None
+            collect_count_process = None
 
             try:
-                collect_counts_process = Process(
+                collect_count_process = Process(
+                    name='collect_count',
                     target=self._collect_counts,
                     args=(self.multiprocessing_stats,)
                 )
-                collect_counts_process.start()
+                collect_count_process.start()
 
                 collect_size_process = Process(
+                    name='collect_size',
                     target=self._collect_size,
                     args=(self.multiprocessing_stats,)
                 )
@@ -121,11 +123,11 @@ class IterFilesystem:
                 if self.wait:
                     # In tests we would like to see all results
                     collect_size_process.join()
-                    collect_counts_process.join()
+                    collect_count_process.join()
                 else:
                     # After process all files, the stat processes not needed:
                     collect_size_process.terminate()
-                    collect_counts_process.terminate()
+                    collect_count_process.terminate()
             except KeyboardInterrupt:
                 self.stats_helper.abort = True
                 self.stats_helper.process_duration = default_timer() - start_time
@@ -134,8 +136,8 @@ class IterFilesystem:
                 if collect_size_process is not None:
                     collect_size_process.terminate()
 
-                if collect_counts_process is not None:
-                    collect_counts_process.terminate()
+                if collect_count_process is not None:
+                    collect_count_process.terminate()
 
         self.stats_helper.done()
         self.done()
