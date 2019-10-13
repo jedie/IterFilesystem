@@ -4,6 +4,8 @@ import traceback
 from multiprocessing import Manager, Process
 from timeit import default_timer
 
+import psutil
+
 # IterFilesystem
 from iterfilesystem.constants import (
     COLLECT_COUNT_DONE,
@@ -19,6 +21,39 @@ from iterfilesystem.statistic_helper import StatisticHelper
 from iterfilesystem.utils import UpdateInterval
 
 log = logging.getLogger()
+
+
+def set_high_priority():
+    p = psutil.Process()
+    try:
+        old_ionice = p.ionice()
+
+        if psutil.LINUX:
+            p.ionice(psutil.IOPRIO_CLASS_BE, value=0)
+        else:
+            # Windows
+            p.ionice(psutil.IOPRIO_HIGH)
+
+        new_ionice = p.ionice()
+    except Exception as err:
+        log.warning('Can not change ionice: %s', err)
+    else:
+        log.info('Change ionice from %s to %s', old_ionice, new_ionice)
+
+    try:
+        old_nice = p.nice()
+
+        if psutil.LINUX:
+            p.nice(-5)
+        else:
+            # Windows
+            p.nice(psutil.HIGH_PRIORITY_CLASS)
+
+        new_nice = p.nice()
+    except Exception as err:
+        log.warning('Can not change nice: %s', err)
+    else:
+        log.info('Change nice from %s to %s', old_nice, new_nice)
 
 
 class IterFilesystem:
@@ -49,6 +84,7 @@ class IterFilesystem:
 
     def _collect_counts(self, multiprocessing_stats):
         log.info('Collect filesystem item process starts')
+        set_high_priority()
         scan_dir_walker = self._get_scan_dir_instance(verbose=False)
 
         update_interval = UpdateInterval(interval=self.update_interval_sec)
@@ -71,6 +107,7 @@ class IterFilesystem:
 
     def _collect_size(self, multiprocessing_stats):
         log.info('Collect file size process starts')
+        set_high_priority()
         collect_file_size = 0
         scan_dir_walker = self._get_scan_dir_instance(verbose=False)
 
