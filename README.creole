@@ -1,19 +1,53 @@
 == IterFilesystem
 
-Multiprocess directory iteration via {{{os.scandir()}}}:
+Multiprocess directory iteration via {{{os.scandir()}}}
 
-* "stats" processes:
-** only counts up all directories and files.
-** accumulates the sizes of all files.
-* "worker" process:
-** Filesystem walk and process the real action with dir/files
+Who's this Lib for?
 
-among other things these packages are used:
- * progress bar [[https://pypi.org/project/tqdm/|tqdm]]
+You want to process a large number of files and/or a few very big files and give feedback to the user on how long it will take.
 
-Requirement:
+
+=== Features:
+
+* Progress indicator:
+** Immediately after start: process files and indication of progress via multiprocess
+** process bars via [[https://pypi.org/project/tqdm/|tqdm]]
+** Estimated time based on file count and size
+* Easy to implement extra process bar for big file processing.
+* Skip directories and file name via fnmatch.
+
+
+=== How it works:
+
+The main process starts //statistic// processes in background via Python multiprocess and starts directly with the work.
+
+There are two background //statistic// processes collects information for the process bars:
+
+* Count up all directories and files.
+* Accumulates the sizes of all files.
+
+Why two processes?
+
+Because collect only the count of all filesystem items via {{{os.scandir()}}} is very fast. This is the fastest way to predict a processing time.
+
+Use {{{os.DirEntry.stat()}}} to get the file size is significantly slower: It requires another system call.
+
+OK, but why two processed?
+
+Use only the total count of all {{{DirEntry}}} may result in bad estimated time Progress indication.
+It depends on what the actual work is about: When processing the contents of large files, it is good to know how much total data to be processed.
+
+That's why we used two ways: the {{{DirEntry}}} count to forecast a processing time very quickly and the size to improve the predicted time.
+
+
+=== requirements:
+
  * Python 3.6 or newer.
- * [[https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv|Pipenv]]. Packages and virtual environment manager.
+ * {{{tqdm}}} for process bars
+ * For dev.: [[https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv|Pipenv]]. Packages and virtual environment manager
+
+
+=== contribute
 
 Please: try, fork and contribute! ;)
 
