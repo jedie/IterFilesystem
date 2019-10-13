@@ -34,10 +34,10 @@ class TestScanDirWalk(BaseTestCase):
 
         assert names == ['one', 'one.txt', 'skip1.foo', 'skip2.bar', 'two', 'two.txt']
 
-        assert stats_helper.dir_count == 2
-        assert stats_helper.file_count == 4
-        assert stats_helper.skip_dir_count == 0
-        assert stats_helper.skip_file_count == 0
+        assert stats_helper.walker_dir_count == 2
+        assert stats_helper.walker_file_count == 4
+        assert stats_helper.walker_dir_skip_count == 0
+        assert stats_helper.walker_file_skip_count == 0
 
         print('*' * 100)
 
@@ -56,10 +56,10 @@ class TestScanDirWalk(BaseTestCase):
 
         assert names == ['one', 'one.txt', 'two', 'two.txt']
 
-        assert stats_helper.dir_count == 2
-        assert stats_helper.file_count == 2
-        assert stats_helper.skip_dir_count == 0
-        assert stats_helper.skip_file_count == 2
+        assert stats_helper.walker_dir_count == 2
+        assert stats_helper.walker_file_count == 2
+        assert stats_helper.walker_dir_skip_count == 0
+        assert stats_helper.walker_file_skip_count == 2
 
         print('*' * 100)
 
@@ -78,7 +78,7 @@ class TestScanDirWalk(BaseTestCase):
 
         assert names == ['skip1.foo', 'skip2.bar']
 
-        assert stats_helper.dir_count == 0
-        assert stats_helper.file_count == 2
-        assert stats_helper.skip_dir_count == 2
-        assert stats_helper.skip_file_count == 0
+        assert stats_helper.walker_dir_count == 0
+        assert stats_helper.walker_file_count == 2
+        assert stats_helper.walker_dir_skip_count == 2
+        assert stats_helper.walker_file_skip_count == 0

@@ -50,4 +50,4 @@ class TestCli(BaseTestCase):
         captured_out, captured_err = verbose_get_capsys(capsys)
 
         assert 'usage: print_fs_stats.py' not in captured_out
-        assert 'hash: ' in captured_out
+        assert "'hash': " in captured_out

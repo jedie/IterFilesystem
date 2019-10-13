@@ -28,3 +28,16 @@ def verbose_get_capsys(capsys):
     print(captured_err)
     print('-' * 100)
     return captured_out, captured_err
+
+
+def stats_helper2assertments(stats_helper):
+    for key, value in stats_helper.items():
+        if 'duration' in key:
+            continue
+
+        print(f'assert stats_helper.{key} == {value}')
+
+    print(
+        f'assert stats_helper.get_walker_dir_item_count()'
+        f' == {stats_helper.get_walker_dir_item_count()}'
+    )

@@ -1,12 +1,15 @@
 import logging
 import sys
+import traceback
 from multiprocessing import Manager, Process
 from timeit import default_timer
 
 # IterFilesystem
 from iterfilesystem.constants import (
     COLLECT_COUNT_DONE,
+    COLLECT_COUNT_DURATION,
     COLLECT_SIZE_DONE,
+    COLLECT_SIZE_DURATION,
     DIR_ITEM_COUNT,
     FILE_SIZE
 )
@@ -49,38 +52,42 @@ class IterFilesystem:
         start_time = default_timer()
         for _ in scan_dir_walker:
             if update_interval:
-                multiprocessing_stats[DIR_ITEM_COUNT] = scan_dir_walker.stats_helper.dir_item_count
+                multiprocessing_stats[DIR_ITEM_COUNT] = \
+                    scan_dir_walker.stats_helper.get_walker_dir_item_count()
         duration = default_timer() - start_time
 
-        multiprocessing_stats[DIR_ITEM_COUNT] = scan_dir_walker.stats_helper.dir_item_count
+        multiprocessing_stats[DIR_ITEM_COUNT] = \
+            scan_dir_walker.stats_helper.get_walker_dir_item_count()
         multiprocessing_stats[COLLECT_COUNT_DONE] = True
+        multiprocessing_stats[COLLECT_COUNT_DURATION] = duration
 
         Printer.write(
             f'Collect filesystem item process done in {human_time(duration)}'
-            f' ({scan_dir_walker.stats_helper.dir_item_count} items)'
+            f' ({scan_dir_walker.stats_helper.get_walker_dir_item_count()} items)'
         )
 
     def _collect_size(self, multiprocessing_stats):
         log.info('Collect file size process starts')
-        total_file_size = 0
+        collect_file_size = 0
         scan_dir_walker = self._get_scan_dir_instance(verbose=False)
 
         update_interval = UpdateInterval(interval=self.update_interval_sec)
         start_time = default_timer()
         for dir_entry in scan_dir_walker:
             if dir_entry.is_file(follow_symlinks=False):
-                total_file_size += dir_entry.stat().st_size
+                collect_file_size += dir_entry.stat().st_size
 
             if update_interval:
-                multiprocessing_stats[FILE_SIZE] = total_file_size
+                multiprocessing_stats[FILE_SIZE] = collect_file_size
         duration = default_timer() - start_time
 
-        multiprocessing_stats[FILE_SIZE] = total_file_size
+        multiprocessing_stats[FILE_SIZE] = collect_file_size
         multiprocessing_stats[COLLECT_SIZE_DONE] = True
+        multiprocessing_stats[COLLECT_SIZE_DURATION] = duration
 
         Printer.write(
             f'Collect file size process done in {human_time(duration)}'
-            f' ({human_filesize(total_file_size)})'
+            f' ({human_filesize(collect_file_size)})'
         )
 
     def process(self):
@@ -129,7 +136,17 @@ class IterFilesystem:
         log.info('Worker starts')
         with IterFilesystemProcessBar() as process_bars:
             for dir_entry in self.worker_scan_dir:
-                self.process_dir_entry(dir_entry=dir_entry, process_bars=process_bars)
+                try:
+                    self.process_dir_entry(dir_entry=dir_entry, process_bars=process_bars)
+                except OSError:
+                    self.stats_helper.process_error_count += 1
+                    Printer.write('\n'.join([
+                        '=' * 100,
+                        f'Error processing dir entry: {dir_entry.path}',
+                        ' -' * 50,
+                        traceback.format_exc().rstrip(),
+                        '=' * 100,
+                    ]))
 
                 if self.worker_update_interval:
                     self._update_stats_helper(dir_entry, process_bars)
@@ -145,6 +162,7 @@ class IterFilesystem:
         process_bars.update(self.stats_helper, dir_entry)
 
     def update(self, dir_entry, file_size, process_bars):
+        self.stats_helper.process_files += 1
         self.stats_helper.update(file_size=file_size)
         if self.worker_update_interval:
             self._update_stats_helper(dir_entry, process_bars)
