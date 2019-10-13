@@ -7,7 +7,7 @@ from iterfilesystem.constants import (
 )
 
 
-class Statistics:
+class StatisticHelper:
     def __init__(self):
         # set by ScandirWalker:
         self.dir_item_count = 0
@@ -32,13 +32,13 @@ class Statistics:
         self.total_file_size_processed = 0
 
     def update_from_scandir_walker(self, scan_dir_walker):
-        self.dir_item_count = scan_dir_walker.statistics.dir_item_count
-        self.dir_count = scan_dir_walker.statistics.dir_count
-        self.skip_dir_count = scan_dir_walker.statistics.skip_dir_count
-        self.processed_dirs = scan_dir_walker.statistics.processed_dirs
-        self.file_count = scan_dir_walker.statistics.file_count
-        self.skip_file_count = scan_dir_walker.statistics.skip_file_count
-        self.processed_files = scan_dir_walker.statistics.processed_files
+        self.dir_item_count = scan_dir_walker.stats_helper.dir_item_count
+        self.dir_count = scan_dir_walker.stats_helper.dir_count
+        self.skip_dir_count = scan_dir_walker.stats_helper.skip_dir_count
+        self.processed_dirs = scan_dir_walker.stats_helper.processed_dirs
+        self.file_count = scan_dir_walker.stats_helper.file_count
+        self.skip_file_count = scan_dir_walker.stats_helper.skip_file_count
+        self.processed_files = scan_dir_walker.stats_helper.processed_files
 
     def update_from_multiprocessing_stats(self, multiprocessing_stats):
         self.total_dir_item_count = multiprocessing_stats.get(DIR_ITEM_COUNT, 0)

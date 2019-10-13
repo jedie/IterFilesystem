@@ -12,13 +12,13 @@ class ScandirWalker:
             self,
             *,
             top_path,
-            statistics,
+            stats_helper,
             skip_dir_patterns=(),
             skip_file_patterns=(),
             verbose=True):
         self.verbose = verbose
         self.top_path = self.get_top_path(top_path)
-        self.statistics = statistics
+        self.stats_helper = stats_helper
         self.skip_dir_patterns = self.get_skip_dir_patterns(skip_dir_patterns)
         self.skip_file_patterns = self.get_skip_file_patterns(skip_file_patterns)
 
@@ -68,7 +68,7 @@ class ScandirWalker:
 
         yield from self._iter_scandir(path=self.top_path)
 
-        self.statistics.scan_duration = default_timer() - start_time
+        self.stats_helper.scan_duration = default_timer() - start_time
 
     def _iter_scandir(self, path):
         try:
@@ -78,19 +78,19 @@ class ScandirWalker:
             return
 
         for dir_entry in dir_entry_iterator:
-            self.statistics.dir_item_count += 1
+            self.stats_helper.dir_item_count += 1
             if dir_entry.is_dir(follow_symlinks=False):
                 if self.fnmatches(dir_item_name=dir_entry.name, patterns=self.skip_dir_patterns):
-                    self.statistics.skip_dir_count += 1
+                    self.stats_helper.skip_dir_count += 1
                     self.on_skip_dir(dir_entry)
                 else:
-                    self.statistics.dir_count += 1
+                    self.stats_helper.dir_count += 1
                     yield dir_entry
                     yield from self._iter_scandir(dir_entry.path)
             else:
                 if self.fnmatches(dir_item_name=dir_entry.name, patterns=self.skip_file_patterns):
-                    self.statistics.skip_file_count += 1
+                    self.stats_helper.skip_file_count += 1
                     self.on_skip_file(dir_entry)
                 else:
-                    self.statistics.file_count += 1
+                    self.stats_helper.file_count += 1
                     yield dir_entry

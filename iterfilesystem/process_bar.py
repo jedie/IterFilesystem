@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from statistics import median_low
 from textwrap import shorten
 
 # https://github.com/tqdm/tqdm
@@ -69,9 +70,7 @@ class WorkerTqdm(tqdm):
         count_percent = percent(statistics.dir_item_count, statistics.total_dir_item_count)
         size_percent = percent(statistics.total_file_size_processed, statistics.total_file_size)
 
-        avg_percent = (count_percent + size_percent) / 2
-
-        self.n = avg_percent
+        self.n = median_low([count_percent, size_percent])
         self.refresh(nolock=True)
 
 
@@ -123,7 +122,7 @@ class FileProcessingTqdm(tqdm):
         )
 
 
-class FilesystemWorkerProcessBar:
+class IterFilesystemProcessBar:
     def __init__(self):
         tqdm.monitor_interval = 0
 

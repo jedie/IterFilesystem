@@ -1,4 +1,5 @@
 import logging
+import sys
 from multiprocessing import Manager, Process
 from timeit import default_timer
 
@@ -10,64 +11,59 @@ from iterfilesystem.constants import (
     FILE_SIZE
 )
 from iterfilesystem.humanize import human_filesize, human_time
-from iterfilesystem.process_bar import FilesystemWorkerProcessBar, Printer
-from iterfilesystem.statistics import Statistics
+from iterfilesystem.process_bar import IterFilesystemProcessBar, Printer
+from iterfilesystem.statistic_helper import StatisticHelper
 from iterfilesystem.utils import UpdateInterval
 
 log = logging.getLogger()
 
 
-class FilesystemWorker:
-    def __init__(
-            self,
-            *,
-            ScanDirClass,
-            scan_dir_kwargs,
-            WorkerClass,
-            update_interval_sec,
-            wait=False):
-        scan_dir_kwargs.update(dict(
-            statistics=Statistics()
-        ))
+class IterFilesystem:
+    multiprocessing_stats = None  # will be created in process()
 
-        # fail fast -> check if scan directory exists, before create sub processed:
-        ScanDirClass(**scan_dir_kwargs, verbose=True)
+    def __init__(self, *, ScanDirClass, scan_dir_kwargs, update_interval_sec, wait=False):
 
+        self.stats_helper = StatisticHelper()
         self.ScanDirClass = ScanDirClass
         self.scan_dir_kwargs = scan_dir_kwargs
-        self.WorkerClass = WorkerClass
+
+        # fail fast -> check if scan directory exists, before create sub processed:
+        self.worker_scan_dir = self._get_scan_dir_instance(verbose=True)
+
         self.update_interval_sec = update_interval_sec
+        self.worker_update_interval = UpdateInterval(interval=self.update_interval_sec)
         self.wait = wait
 
-    def get_scan_dir_instance(self, verbose):
+    def _get_scan_dir_instance(self, verbose):
         self.scan_dir_kwargs.update(dict(
             verbose=verbose,
+            stats_helper=self.stats_helper
         ))
         return self.ScanDirClass(**self.scan_dir_kwargs)
 
-    def collect_counts(self, multiprocessing_stats):
+    def _collect_counts(self, multiprocessing_stats):
         log.info('Collect filesystem item process starts')
-        scan_dir_walker = self.get_scan_dir_instance(verbose=False)
+        scan_dir_walker = self._get_scan_dir_instance(verbose=False)
 
         update_interval = UpdateInterval(interval=self.update_interval_sec)
         start_time = default_timer()
         for _ in scan_dir_walker:
             if update_interval:
-                multiprocessing_stats[DIR_ITEM_COUNT] = scan_dir_walker.statistics.dir_item_count
+                multiprocessing_stats[DIR_ITEM_COUNT] = scan_dir_walker.stats_helper.dir_item_count
         duration = default_timer() - start_time
 
-        multiprocessing_stats[DIR_ITEM_COUNT] = scan_dir_walker.statistics.dir_item_count
+        multiprocessing_stats[DIR_ITEM_COUNT] = scan_dir_walker.stats_helper.dir_item_count
         multiprocessing_stats[COLLECT_COUNT_DONE] = True
 
         Printer.write(
             f'Collect filesystem item process done in {human_time(duration)}'
-            f' ({scan_dir_walker.statistics.dir_item_count} items)'
+            f' ({scan_dir_walker.stats_helper.dir_item_count} items)'
         )
 
-    def collect_size(self, multiprocessing_stats):
+    def _collect_size(self, multiprocessing_stats):
         log.info('Collect file size process starts')
         total_file_size = 0
-        scan_dir_walker = self.get_scan_dir_instance(verbose=False)
+        scan_dir_walker = self._get_scan_dir_instance(verbose=False)
 
         update_interval = UpdateInterval(interval=self.update_interval_sec)
         start_time = default_timer()
@@ -89,101 +85,87 @@ class FilesystemWorker:
 
     def process(self):
         with Manager() as manager:
-            multiprocessing_stats = manager.dict()
+            self.multiprocessing_stats = manager.dict()
 
-            collect_counts_process = Process(
-                target=self.collect_counts,
-                args=(multiprocessing_stats,)
-            )
-            collect_counts_process.start()
-
-            collect_size_process = Process(
-                target=self.collect_size,
-                args=(multiprocessing_stats,)
-            )
-            collect_size_process.start()
-
-            self.scan_dir_kwargs.update(dict(
-                verbose=True,
-                statistics=Statistics()
-            ))
-            with FilesystemWorkerProcessBar() as process_bar:
-                worker = self.WorkerClass(
-                    process_bar=process_bar,
-                    scan_dir_walker=self.ScanDirClass(**self.scan_dir_kwargs),
-                    multiprocessing_stats=multiprocessing_stats,
-                    update_interval_sec=self.update_interval_sec,
+            try:
+                collect_counts_process = Process(
+                    target=self._collect_counts,
+                    args=(self.multiprocessing_stats,)
                 )
-                worker.start()
-            statistics = worker.done()
+                collect_counts_process.start()
 
-            if self.wait:
-                # In tests we would like to see all results
-                collect_size_process.join()
-                collect_counts_process.join()
-            else:
-                # After process all files, the stat processes not needed:
+                collect_size_process = Process(
+                    target=self._collect_size,
+                    args=(self.multiprocessing_stats,)
+                )
+                collect_size_process.start()
+
+                start_time = default_timer()
+                self._work()
+                duration = default_timer() - start_time
+                self.stats_helper.process_duration = duration
+
+                if self.wait:
+                    # In tests we would like to see all results
+                    collect_size_process.join()
+                    collect_counts_process.join()
+                else:
+                    # After process all files, the stat processes not needed:
+                    collect_size_process.terminate()
+                    collect_counts_process.terminate()
+            except KeyboardInterrupt:
+                self.stats_helper.abort = True
+                self.stats_helper.process_duration = default_timer() - start_time
+                print('\n *** Abort via keyboard interrupt! ***\n', file=sys.stderr)
+            finally:
                 collect_size_process.terminate()
                 collect_counts_process.terminate()
 
-        return statistics
+        self.stats_helper.done()
+        self.done()
+        return self.stats_helper
 
+    def _work(self):
+        log.info('Worker starts')
+        with IterFilesystemProcessBar() as process_bars:
+            for dir_entry in self.worker_scan_dir:
+                self.process_dir_entry(dir_entry=dir_entry, process_bars=process_bars)
 
-class FilesystemBaseWorker:
-    def __init__(
-            self,
-            *,
-            process_bar,
-            scan_dir_walker,
-            multiprocessing_stats,
-            update_interval_sec):
-        self._process_bar = process_bar
-        self.scan_dir_walker = scan_dir_walker
-        self.multiprocessing_stats = multiprocessing_stats
-        self.update_interval_sec = update_interval_sec
-        self._update_interval = UpdateInterval(interval=self.update_interval_sec)
+                if self.worker_update_interval:
+                    self._update_stats_helper(dir_entry, process_bars)
 
-        self.statistics = Statistics()
+            self._update_stats_helper(dir_entry, process_bars)
+        log.info('Worker done.')
 
-    def _update_statistics(self, dir_entry):
-        self.statistics.update_from_worker(
-            scan_dir_walker=self.scan_dir_walker,
+    def _update_stats_helper(self, dir_entry, process_bars):
+        self.stats_helper.update_from_worker(
+            scan_dir_walker=self.worker_scan_dir,
             multiprocessing_stats=self.multiprocessing_stats,
         )
-        self._process_bar.update(self.statistics, dir_entry)
+        process_bars.update(self.stats_helper, dir_entry)
 
-    def update(self, dir_entry, file_size):
-        self.statistics.update(file_size=file_size)
-        if self._update_interval:
-            self._update_statistics(dir_entry)
-
-    def start(self):
-        log.info('Worker starts')
-
-        for dir_entry in self.scan_dir_walker:
-            self.process(dir_entry=dir_entry)
-
-            if self._update_interval:
-                self._update_statistics(dir_entry)
-
-        self._update_statistics(dir_entry)
-
-        log.info('Worker done.')
+    def update(self, dir_entry, file_size, process_bars):
+        self.stats_helper.update(file_size=file_size)
+        if self.worker_update_interval:
+            self._update_stats_helper(dir_entry, process_bars)
 
     ##############################################################################################
     # methods to overwrite:
 
-    def process(self, dir_entry):
+    def process_dir_entry(self, dir_entry, process_bars):
         """
-        The implementation must update the total file size, e.g.:
-
-            self.update(dir_entry=dir_entry, file_size=dir_entry.stat().st_size)
+        The implementation must update the total file size, see below:
         """
+        # e.g.:
+        self.update(
+            dir_entry=dir_entry,
+            file_size=dir_entry.stat().st_size,
+            process_bars=process_bars
+        )
         raise NotImplementedError()
 
     def done(self):
         """
-        Can be overwritten but statistics should be returned!
+        Will be called after all dir items are processed
         """
-        self.statistics.done()
-        return self.statistics
+        pass

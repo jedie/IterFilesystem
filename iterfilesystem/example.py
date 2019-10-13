@@ -2,25 +2,24 @@
 
 import hashlib
 from pathlib import Path
-from timeit import default_timer
 
 # IterFilesystem
 from iterfilesystem.humanize import human_filesize
 from iterfilesystem.iter_scandir import ScandirWalker
-from iterfilesystem.main import FilesystemBaseWorker, FilesystemWorker
+from iterfilesystem.main import IterFilesystem
 from iterfilesystem.process_bar import FileProcessingTqdm
 from iterfilesystem.utils import UpdateInterval
 
 
-class CalcSHA512Worker(FilesystemBaseWorker):
+class CalcFilesystemSHA512(IterFilesystem):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.hash = hashlib.sha512()
-        self.process_bar = FileProcessingTqdm()
-        self.update_interval = UpdateInterval(interval=self.update_interval_sec)
+        self.process_file_bar = FileProcessingTqdm()
+        self.update_file_interval = UpdateInterval(interval=self.update_interval_sec)
 
-    def process(self, *, dir_entry):
+    def process_dir_entry(self, dir_entry, process_bars):
         if not dir_entry.is_file(follow_symlinks=False):
             # Skip all non files
             return
@@ -29,8 +28,8 @@ class CalcSHA512Worker(FilesystemBaseWorker):
         big_file = total_file_size > 10 * 1024 * 1024
 
         if big_file:
-            self.process_bar.desc = f'Calc SHA512 for "{dir_entry.name}"'
-            self.process_bar.reset(total=dir_entry.stat().st_size)
+            self.process_file_bar.desc = f'Calc SHA512 for "{dir_entry.name}"'
+            self.process_file_bar.reset(total=dir_entry.stat().st_size)
 
         with Path(dir_entry).open('rb') as f:
             processed_size = 0
@@ -42,67 +41,76 @@ class CalcSHA512Worker(FilesystemBaseWorker):
 
                 processed_size += len(data)
 
-                if big_file and self.update_interval:
-                    self.process_bar.update(processed_size)
-                    self.update(dir_entry=dir_entry, file_size=processed_size)
+                if big_file and self.update_file_interval:
+                    self.process_file_bar.update(processed_size)
+                    self.update(
+                        dir_entry=dir_entry,
+                        file_size=processed_size,
+                        process_bars=process_bars
+                    )
                     processed_size = 0
 
         if big_file:
-            self.process_bar.update(processed_size)
-            self.update(dir_entry=dir_entry, file_size=processed_size)
+            self.process_file_bar.update(processed_size)
+            self.update(
+                dir_entry=dir_entry,
+                file_size=processed_size,
+                process_bars=process_bars
+            )
         else:
             # Always update the global statistics / process bars:
-            self.update(dir_entry=dir_entry, file_size=total_file_size)
+            self.update(
+                dir_entry=dir_entry,
+                file_size=total_file_size,
+                process_bars=process_bars
+            )
 
     def done(self):
-        self.process_bar.close()
-
-        self.statistics.hash = self.hash.hexdigest()  # Just add hash to statistics ;)
-
-        return super().done()  # return the statistics
+        self.process_file_bar.close()
+        self.stats_helper.hash = self.hash.hexdigest()  # Just add hash to statistics ;)
 
 
 def calc_sha512(*, top_path, skip_dir_patterns=(), skip_file_patterns=(), wait=False):
-    fs_worker = FilesystemWorker(
+    calc_sha = CalcFilesystemSHA512(
         ScanDirClass=ScandirWalker,
         scan_dir_kwargs=dict(
             top_path=top_path,
             skip_dir_patterns=skip_dir_patterns,
             skip_file_patterns=skip_file_patterns,
         ),
-        WorkerClass=CalcSHA512Worker,
         update_interval_sec=0.5,
         wait=wait
     )
-
-    start_time = default_timer()
-    statistics = fs_worker.process()
-    duration = default_timer() - start_time
+    stats_helper = calc_sha.process()
 
     print('\n\n')
-    print(f'Processed {statistics.total_dir_item_count} filesystem items in {duration:.2f} sec')
-    print(f'SHA515 hash calculated over all file content: {statistics.hash}')
-    print(f'File count: {statistics.file_count}')
-    print(f'Total file size: {human_filesize(statistics.total_file_size)}')
+    print(
+        f'Processed {stats_helper.total_dir_item_count} filesystem items'
+        f' in {stats_helper.process_duration:.2f} sec'
+    )
+    print(f'SHA515 hash calculated over all file content: {stats_helper.hash}')
+    print(f'File count: {stats_helper.file_count}')
+    print(f'Total file size: {human_filesize(stats_helper.total_file_size)}')
 
     if skip_dir_patterns:
-        print(f'{statistics.skip_dir_count} directories skipped.')
+        print(f'{stats_helper.skip_dir_count} directories skipped.')
 
     if skip_file_patterns:
-        print(f'{statistics.skip_file_count} files skipped.')
+        print(f'{stats_helper.skip_file_count} files skipped.')
 
-    return statistics
+    return stats_helper
 
 
 if __name__ == '__main__':
-    statistics = calc_sha512(
+    stats_helper = calc_sha512(
         # top_path='/foo/bar/',
-        top_path='~',
+        # top_path='~',
         # top_path='~/bin',
-        skip_dir_patterns=('.config', '.local', 'temp', '__cache__'),
+        top_path='~/repos',
+        skip_dir_patterns=('.tox', '.config', '.local', 'temp', '__cache__'),
         skip_file_patterns=('*.temp', '*.egg-info'),
     )
 
-    print(statistics.pformat())
+    print(stats_helper.pformat())
 
     # calc_sha512(path='~/Downloads')

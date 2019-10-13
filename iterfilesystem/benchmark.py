@@ -1,15 +1,15 @@
 # IterFilesystem
 from iterfilesystem.iter_scandir import ScandirWalker
-from iterfilesystem.statistics import Statistics
+from iterfilesystem.statistic_helper import StatisticHelper
 from iterfilesystem.utils import UpdateInterval
 
 
 def main(top_path):
-    statistics = Statistics()
+    stats_helper = StatisticHelper()
 
     sw = ScandirWalker(
         top_path=top_path,
-        statistics=statistics,
+        stats_helper=stats_helper,
         skip_dir_patterns=('.*', '*.egg-info'),
         skip_file_patterns=('.*', '*.temp', '*.bak'),
         verbose=True
@@ -22,8 +22,8 @@ def main(top_path):
         if update:
             print(f'{count} dir items')
 
-    statistics.print_stats()
+    stats_helper.print_stats()
 
 
 if __name__ == '__main__':
-    main(top_path='~/hoods')
+    main(top_path='~/repos')
