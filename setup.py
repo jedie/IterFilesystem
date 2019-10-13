@@ -205,7 +205,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    description="Threaded directory iteration via os.scandir() with progress indicator and resume function.",
+    description="Multiprocess directory iteration via os.scandir() with progress indicator via tqdm bars.",
     entry_points={
         'console_scripts': [
             'print_fs_stats=iterfilesystem.bin.print_fs_stats:main'
