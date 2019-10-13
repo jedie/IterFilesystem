@@ -58,8 +58,11 @@ if "publish" in sys.argv:
         #   error: invalid command 'bdist_wheel'
         import wheel  # noqa
     except ImportError as err:
-        print("\nError: %s" % err)
-        print("\nMaybe https://pypi.org/project/wheel is not installed or virtualenv not activated?!?")
+        print("\nError: %s\n" % err)
+        print(
+            "Maybe https://pypi.org/project/wheel is not installed"
+            " or virtualenv not activated?!?"
+        )
         print("e.g.:")
         print("    ~/your/env/$ source bin/activate")
         print("    ~/your/env/$ pip install wheel")
@@ -68,8 +71,11 @@ if "publish" in sys.argv:
     try:
         import twine  # noqa
     except ImportError as err:
-        print("\nError: %s" % err)
-        print("\nMaybe https://pypi.org/project/twine is not installed or virtualenv not activated?!?")
+        print("\nError: %s\n" % err)
+        print(
+            "Maybe https://pypi.org/project/twine is not installed"
+            " or virtualenv not activated?!?"
+        )
         print("e.g.:")
         print("    ~/your/env/$ source bin/activate")
         print("    ~/your/env/$ pip install twine")
@@ -205,7 +211,10 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    description="Threaded directory iteration via os.scandir() with progress indicator and resume function.",
+    description=(
+        "Threaded directory iteration via os.scandir()"
+        " with progress indicator and resume function."
+    ),
     entry_points={
         'console_scripts': [
             'print_fs_stats=iterfilesystem.bin.print_fs_stats:main'
