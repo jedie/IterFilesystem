@@ -7,15 +7,12 @@ from pathlib import Path
 from iterfilesystem.humanize import human_filesize
 from iterfilesystem.iter_scandir import ScandirWalker
 from iterfilesystem.main import IterFilesystem
-from iterfilesystem.utils import UpdateInterval
 
 
 class CalcFilesystemSHA512(IterFilesystem):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
+    def start(self):
         self.hash = hashlib.sha512()
-        self.update_file_interval = UpdateInterval(interval=self.update_interval_sec)
+        super().start()
 
     def process_dir_entry(self, dir_entry, process_bars):
         if not dir_entry.is_file(follow_symlinks=False):

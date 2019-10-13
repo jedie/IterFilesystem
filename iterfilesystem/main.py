@@ -37,6 +37,9 @@ class IterFilesystem:
         self.worker_update_interval = UpdateInterval(interval=self.update_interval_sec)
         self.wait = wait
 
+        # init in self.start()
+        self.update_file_interval = None  # status interval for big file processing
+
     def _get_scan_dir_instance(self, verbose):
         self.scan_dir_kwargs.update(dict(
             verbose=verbose,
@@ -111,7 +114,7 @@ class IterFilesystem:
                 collect_size_process.start()
 
                 start_time = default_timer()
-                self._work()
+                self.start()
                 duration = default_timer() - start_time
                 self.stats_helper.process_duration = duration
 
@@ -138,8 +141,26 @@ class IterFilesystem:
         self.done()
         return self.stats_helper
 
-    def _work(self):
+    def _update_stats_helper(self, dir_entry, process_bars):
+        self.stats_helper.update_from_worker(
+            scan_dir_walker=self.worker_scan_dir,
+            multiprocessing_stats=self.multiprocessing_stats,
+        )
+        process_bars.update(self.stats_helper, dir_entry)
+
+    def update(self, dir_entry, file_size, process_bars):
+        self.stats_helper.process_files += 1
+        self.stats_helper.update(file_size=file_size)
+        if self.worker_update_interval:
+            self._update_stats_helper(dir_entry, process_bars)
+
+    ##############################################################################################
+    # methods to overwrite:
+
+    def start(self):
         log.info('Worker starts')
+
+        self.update_file_interval = UpdateInterval(interval=self.update_interval_sec)
         with IterFilesystemProcessBar() as process_bars:
             for dir_entry in self.worker_scan_dir:
                 try:
@@ -159,22 +180,6 @@ class IterFilesystem:
 
             self._update_stats_helper(dir_entry, process_bars)
         log.info('Worker done.')
-
-    def _update_stats_helper(self, dir_entry, process_bars):
-        self.stats_helper.update_from_worker(
-            scan_dir_walker=self.worker_scan_dir,
-            multiprocessing_stats=self.multiprocessing_stats,
-        )
-        process_bars.update(self.stats_helper, dir_entry)
-
-    def update(self, dir_entry, file_size, process_bars):
-        self.stats_helper.process_files += 1
-        self.stats_helper.update(file_size=file_size)
-        if self.worker_update_interval:
-            self._update_stats_helper(dir_entry, process_bars)
-
-    ##############################################################################################
-    # methods to overwrite:
 
     def process_dir_entry(self, dir_entry, process_bars):
         """
