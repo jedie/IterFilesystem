@@ -15,6 +15,7 @@ pytest-cov = "*"
 python-creole = "*"
 
 [packages]
+psutil = "*"
 tqdm = "*"
 
 [requires]

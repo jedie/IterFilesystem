@@ -4,8 +4,6 @@ import traceback
 from multiprocessing import Manager, Process
 from timeit import default_timer
 
-import psutil
-
 # IterFilesystem
 from iterfilesystem.constants import (
     COLLECT_COUNT_DONE,
@@ -17,43 +15,11 @@ from iterfilesystem.constants import (
 )
 from iterfilesystem.humanize import human_filesize, human_time
 from iterfilesystem.process_bar import IterFilesystemProcessBar, Printer
+from iterfilesystem.process_priority import set_high_priority, set_low_priority
 from iterfilesystem.statistic_helper import StatisticHelper
 from iterfilesystem.utils import UpdateInterval
 
 log = logging.getLogger()
-
-
-def set_high_priority():
-    p = psutil.Process()
-    try:
-        old_ionice = p.ionice()
-
-        if psutil.LINUX:
-            p.ionice(psutil.IOPRIO_CLASS_BE, value=0)
-        else:
-            # Windows
-            p.ionice(psutil.IOPRIO_HIGH)
-
-        new_ionice = p.ionice()
-    except Exception as err:
-        log.warning('Can not change ionice: %s', err)
-    else:
-        log.info('Change ionice from %s to %s', old_ionice, new_ionice)
-
-    try:
-        old_nice = p.nice()
-
-        if psutil.LINUX:
-            p.nice(-5)
-        else:
-            # Windows
-            p.nice(psutil.HIGH_PRIORITY_CLASS)
-
-        new_nice = p.nice()
-    except Exception as err:
-        log.warning('Can not change nice: %s', err)
-    else:
-        log.info('Change nice from %s to %s', old_nice, new_nice)
 
 
 class IterFilesystem:
@@ -74,6 +40,7 @@ class IterFilesystem:
 
         # init in self.start()
         self.update_file_interval = None  # status interval for big file processing
+        self.low_priority_set = None
 
     def _get_scan_dir_instance(self, verbose):
         self.scan_dir_kwargs.update(dict(
@@ -152,6 +119,9 @@ class IterFilesystem:
                 )
                 collect_size_process.start()
 
+                set_low_priority()
+                self.low_priority_set = True
+
                 start_time = default_timer()
                 self.start()
                 duration = default_timer() - start_time
@@ -185,6 +155,11 @@ class IterFilesystem:
             scan_dir_walker=self.worker_scan_dir,
             multiprocessing_stats=self.multiprocessing_stats,
         )
+        if self.low_priority_set:
+            if self.stats_helper.collect_dir_item_count_done and self.stats_helper.collect_file_size_done:
+                set_high_priority()
+                self.low_priority_set = False
+
         process_bars.update(self.stats_helper, dir_entry)
 
     def update(self, dir_entry, file_size, process_bars):
