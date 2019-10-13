@@ -44,6 +44,7 @@ That's why we used two ways: the {{{DirEntry}}} count to forecast a processing t
 
  * Python 3.6 or newer.
  * {{{tqdm}}} for process bars
+ * {{{psutils}}} for setting process priority
  * For dev.: [[https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv|Pipenv]]. Packages and virtual environment manager
 
 
@@ -124,8 +125,10 @@ Total file size: 843.5 KB
 
 == History
 
-* [[https://github.com/jedie/IterFilesystem/compare/v1.2.0...master|**dev** - compare v1.2.0...master]]
+* [[https://github.com/jedie/IterFilesystem/compare/v1.3.0...master|**dev** - compare v1.3.0...master]]
 ** TBC
+* [[https://github.com/jedie/IterFilesystem/compare/v1.2.0...v1.3.0|13.10.2019 - v1.3.0]]
+** Set ionice and nice priority via psutils
 * [[https://github.com/jedie/IterFilesystem/compare/v1.1.0...v1.2.0|13.10.2019 - v1.2.0]]
 ** Refactor API
 ** cleanup statistics and process bar

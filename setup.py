@@ -215,6 +215,10 @@ setup(
         "Multiprocess directory iteration via os.scandir()"
         " with progress indicator via tqdm bars."
     ),
+    install_requires=[
+        'tqdm',
+        'psutil',
+    ],
     entry_points={
         'console_scripts': [
             'print_fs_stats=iterfilesystem.bin.print_fs_stats:main'
