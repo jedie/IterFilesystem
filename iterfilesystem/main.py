@@ -94,6 +94,9 @@ class IterFilesystem:
         with Manager() as manager:
             self.multiprocessing_stats = manager.dict()
 
+            collect_size_process = None
+            collect_counts_process = None
+
             try:
                 collect_counts_process = Process(
                     target=self._collect_counts,
@@ -125,8 +128,11 @@ class IterFilesystem:
                 self.stats_helper.process_duration = default_timer() - start_time
                 print('\n *** Abort via keyboard interrupt! ***\n', file=sys.stderr)
             finally:
-                collect_size_process.terminate()
-                collect_counts_process.terminate()
+                if collect_size_process is not None:
+                    collect_size_process.terminate()
+
+                if collect_counts_process is not None:
+                    collect_counts_process.terminate()
 
         self.stats_helper.done()
         self.done()
