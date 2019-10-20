@@ -176,6 +176,7 @@ class IterFilesystem:
 
         self.update_file_interval = UpdateInterval(interval=self.update_interval_sec)
         with IterFilesystemProcessBar() as process_bars:
+            dir_entry = None
             for dir_entry in self.worker_scan_dir:
                 try:
                     self.process_dir_entry(dir_entry=dir_entry, process_bars=process_bars)
@@ -192,7 +193,8 @@ class IterFilesystem:
                 if self.worker_update_interval:
                     self._update_stats_helper(dir_entry, process_bars)
 
-            self._update_stats_helper(dir_entry, process_bars)
+            if dir_entry is not None:
+                self._update_stats_helper(dir_entry, process_bars)
         log.info('Worker done.')
 
     def process_dir_entry(self, dir_entry, process_bars):

@@ -140,3 +140,19 @@ class TestExample(BaseTestCase):
             assert 'Error processing dir entry' in captured_out
             assert 'PermissionError: [Errno 13] Permission denied:' in captured_out
             assert 'no_read.txt' in captured_out
+
+    def test_empty(self, tmp_path):
+        stats_helper = calc_sha512(
+            top_path=tmp_path
+        )
+
+        stats_helper2assertments(stats_helper)
+
+        assert stats_helper.process_error_count == 0
+        assert stats_helper.process_file_size == 0
+        assert stats_helper.process_files == 0
+        assert stats_helper.walker_dir_count == 0
+        assert stats_helper.walker_dir_skip_count == 0
+        assert stats_helper.walker_file_count == 0
+        assert stats_helper.walker_file_skip_count == 0
+        assert stats_helper.get_walker_dir_item_count() == 0
