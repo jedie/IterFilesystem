@@ -219,6 +219,7 @@ setup(
         'tqdm',
         'psutil',
     ],
+    tests_require=['pytest', 'pipenv'],
     entry_points={
         'console_scripts': [
             'print_fs_stats=iterfilesystem.bin.print_fs_stats:main'
