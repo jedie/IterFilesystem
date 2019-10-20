@@ -5,7 +5,7 @@
 
 __author__ = 'Jens Diemer'
 __email__ = 'python@jensdiemer.de'
-__version__ = '1.3.0'
+__version__ = '1.3.1'
 
 
 def get_module_version():
