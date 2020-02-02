@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "IterFilesystem"
-version = "1.4.0"
+version = "1.4.1"
 description = "Multiprocess directory iteration via os.scandir() with progress indicator via tqdm bars."
 authors = ["JensDiemer <git@jensdiemer.de>"]
 keywords=['filesystem', 'scan', 'walk', 'multiprocess', 'scandir']
