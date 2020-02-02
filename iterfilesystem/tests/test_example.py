@@ -9,10 +9,7 @@ import pytest
 # IterFilesystem
 from iterfilesystem.example import calc_sha512
 from iterfilesystem.tests import BaseTestCase
-from iterfilesystem.tests.test_utils import (
-    stats_helper2assertments,
-    verbose_get_capsys
-)
+from iterfilesystem.tests.test_utils import stats_helper2assertments, verbose_get_capsys
 
 ON_TRAVIS = 'TRAVIS' in os.environ
 

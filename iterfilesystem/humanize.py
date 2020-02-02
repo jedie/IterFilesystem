@@ -19,7 +19,7 @@ def human_time(t):
         divisor = 1
         unit = 'sec'
 
-    return '%.1f%s' % (round(t / divisor, 2), unit)
+    return f'{round(t / divisor, 2):.1f}{unit}'
 
 
 def human_filesize(i):
@@ -28,9 +28,9 @@ def human_filesize(i):
     """
     bytes = float(i)
     if bytes < 1024:
-        return u"%d Byte%s" % (bytes, bytes != 1 and u"s" or u"")
+        return f"{bytes:d} Byte{bytes != 1 and 's' or ''}"
     if bytes < 1024 * 1024:
-        return u"%.1f KB" % (bytes / 1024)
+        return "%.1f KB" % (bytes / 1024)
     if bytes < 1024 * 1024 * 1024:
-        return u"%.1f MB" % (bytes / (1024 * 1024))
-    return u"%.1f GB" % (bytes / (1024 * 1024 * 1024))
+        return "%.1f MB" % (bytes / (1024 * 1024))
+    return "%.1f GB" % (bytes / (1024 * 1024 * 1024))
