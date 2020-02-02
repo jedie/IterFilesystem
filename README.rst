@@ -155,11 +155,15 @@ example output looks like this:
 History
 -------
 
-* `**dev** - compare v1.3.1...master <https://github.com/jedie/IterFilesystem/compare/v1.3.1...master>`_ 
-
-    * use poetry and modernize project setup
+* `**dev** - compare v1.4.0...master <https://github.com/jedie/IterFilesystem/compare/v1.4.0...master>`_ 
 
     * TBC
+
+* `02.02.2020 - v1.4.0 <https://github.com/jedie/IterFilesystem/compare/v1.3.1...v1.4.0>`_ 
+
+    * |stats_helper.abort| exists always usefull to get information if KeyboardInterrupt was used
+
+    * use poetry and modernize project setup
 
 * `20.10.2019 - v1.3.1 <https://github.com/jedie/IterFilesystem/compare/v1.3.0...v1.3.1>`_ 
 
@@ -213,6 +217,8 @@ History
 
     * first Release on PyPi
 
+.. |stats_helper.abort| image:: stats_helper.abort
+
 -----
 Links
 -----
@@ -233,4 +239,4 @@ Donating
 
 ------------
 
-``Note: this file is generated from README.creole 2020-02-02 16:33:52 with "python-creole"``
+``Note: this file is generated from README.creole 2020-02-02 18:21:39 with "python-creole"``
