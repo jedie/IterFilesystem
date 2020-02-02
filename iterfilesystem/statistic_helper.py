@@ -35,13 +35,18 @@ class StatisticHelper:
         self.process_file_size = 0
         self.process_error_count = 0
 
+        # Keeps track if everything is processed:
+        # == None -> done() was not called / unknown error
+        # == True -> KeyboardInterrupt was used
+        # == False -> processed completed
+        self.abort = None
+
     def get_walker_dir_item_count(self):
-        return (
-            self.walker_dir_count
-            + self.walker_dir_skip_count
-            + self.walker_file_count
-            + self.walker_file_skip_count
-        )
+        item_count = self.walker_dir_count
+        item_count += self.walker_dir_skip_count
+        item_count += self.walker_file_count
+        item_count += self.walker_file_skip_count
+        return item_count
 
     def update_from_scandir_walker(self, scan_dir_walker):
         self.walker_dir_count = scan_dir_walker.stats_helper.walker_dir_count
@@ -88,6 +93,10 @@ class StatisticHelper:
         Maybe the scan processes terminated before complete: The worker was faster
         So, 'correct' the statistics.
         """
+        if self.abort is None:
+            # No KeyboardInterrupt -> everything ok
+            self.abort = False
+
         self.collect_dir_item_count = max(
             self.collect_dir_item_count, self.get_walker_dir_item_count()
         )

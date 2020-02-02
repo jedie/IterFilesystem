@@ -71,6 +71,7 @@ class UpdateInterval:
     >>> bool(example)
     True
     """
+
     def __init__(self, *, interval):
         self.interval = interval
         self.set_next_update()

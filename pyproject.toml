@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "IterFilesystem"
+version = "1.4.0.dev0"
+description = "Multiprocess directory iteration via os.scandir() with progress indicator via tqdm bars."
+authors = ["JensDiemer <git@jensdiemer.de>"]
+keywords=['filesystem', 'scan', 'walk', 'multiprocess', 'scandir']
+classifiers = [
+    # http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    "Development Status :: 4 - Beta",
+    #  "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License (GPL)",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3 :: Only",
+    'Framework :: Django',
+    "Topic :: Database :: Front-Ends",
+    "Topic :: Documentation",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Internet :: WWW/HTTP :: Site Management",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    "Operating System :: OS Independent",
+]
+
+# Will be generated from README.creole with: 'poetry run update_rst_readme'
+readme='README.rst'
+
+[tool.poetry.dependencies]
+python = "^3.6"
+tqdm = "*"  # https://github.com/tqdm/tqdm
+psutil = "*"  # https://github.com/mitsuhiko/click
+
+[tool.poetry.dev-dependencies]
+poetry-publish = "^0.2.3"  # https://github.com/jedie/poetry-publish
+tox = "^3.14.3"
+pytest = "^4.6"
+pytest-cov = "^2.8.1"
+coveralls = "*"
+isort = "^4.3.21"
+flake8 = "^3.7.9"
+flynt = "^0.40.1"
+autopep8 = "^1.4.4"
+
+[tool.poetry.scripts]
+update_rst_readme="iterfilesystem.publish:update_readme"
+publish="iterfilesystem.publish:publish"
+print_fs_stats="iterfilesystem.bin.print_fs_stats:main"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

@@ -17,7 +17,7 @@ import traceback
 from pathlib import Path
 
 # IterFilesystem
-from iterfilesystem import get_module_version
+import iterfilesystem
 from iterfilesystem.example import calc_sha512
 from iterfilesystem.process_bar import Printer
 
@@ -31,9 +31,8 @@ def main(*args):
         '-v',
         '--version',
         action='version',
-        version='%(prog)s ' +
-        get_module_version())
-
+        version='%(prog)s ' + iterfilesystem.__version__
+    )
     parser.add_argument(
         '--debug',
         action='store_true',
