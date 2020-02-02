@@ -60,14 +60,14 @@ def main(*args):
     if args:
         print(f'Use args: {args!r}')
     else:
-        args=None
+        args = None
 
-    args=parser.parse_args(args)
+    args = parser.parse_args(args)
 
     if args.debug:
-        log_level=logging.DEBUG
+        log_level = logging.DEBUG
     else:
-        log_level=logging.ERROR
+        log_level = logging.ERROR
 
     logging.basicConfig(
         level=log_level,
@@ -76,7 +76,7 @@ def main(*args):
     )
 
     try:
-        statistics=calc_sha512(
+        statistics = calc_sha512(
             top_path=args.path,
             skip_dir_patterns=args.skip_dir_patterns,
             skip_file_patterns=args.skip_file_patterns,

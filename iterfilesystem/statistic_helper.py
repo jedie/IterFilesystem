@@ -42,12 +42,11 @@ class StatisticHelper:
         self.abort = None
 
     def get_walker_dir_item_count(self):
-        return (
-            self.walker_dir_count
-            + self.walker_dir_skip_count
-            + self.walker_file_count
-            + self.walker_file_skip_count
-        )
+        item_count = self.walker_dir_count
+        item_count += self.walker_dir_skip_count
+        item_count += self.walker_file_count
+        item_count += self.walker_file_skip_count
+        return item_count
 
     def update_from_scandir_walker(self, scan_dir_walker):
         self.walker_dir_count = scan_dir_walker.stats_helper.walker_dir_count

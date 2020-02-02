@@ -57,5 +57,3 @@ def test_keyboard_interrupt(tmp_path, capsys):
     assert stats_helper.walker_file_count == 3
     assert stats_helper.walker_dir_skip_count == 0
     assert stats_helper.walker_file_skip_count == 0
-
-
