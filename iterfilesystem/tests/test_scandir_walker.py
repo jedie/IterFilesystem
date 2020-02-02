@@ -8,16 +8,16 @@ from iterfilesystem.tests import BaseTestCase
 
 
 class TestScanDirWalk(BaseTestCase):
+
     def test_hash(self, tmp_path):
-        for no in range(10):
-            os.makedirs(Path(tmp_path, 'one'), exist_ok=True)
-            Path(tmp_path, 'one', 'one.txt').touch()
+        os.makedirs(Path(tmp_path, 'one'), exist_ok=True)
+        Path(tmp_path, 'one', 'one.txt').touch()
 
-            os.makedirs(Path(tmp_path, 'two'), exist_ok=True)
-            Path(tmp_path, 'two', 'two.txt').touch()
+        os.makedirs(Path(tmp_path, 'two'), exist_ok=True)
+        Path(tmp_path, 'two', 'two.txt').touch()
 
-            Path(tmp_path, 'skip1.foo').touch()
-            Path(tmp_path, 'skip2.bar').touch()
+        Path(tmp_path, 'skip1.foo').touch()
+        Path(tmp_path, 'skip2.bar').touch()
 
         stats_helper = StatisticHelper()
 
