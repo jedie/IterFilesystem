@@ -34,6 +34,10 @@ class TestScanDirWalk(BaseTestCase):
 
         assert names == ['one', 'one.txt', 'skip1.foo', 'skip2.bar', 'two', 'two.txt']
 
+        assert stats_helper.abort is None  # done was not called
+        stats_helper.done()
+        assert stats_helper.abort is False  # no KeyboardInterrupt
+
         assert stats_helper.walker_dir_count == 2
         assert stats_helper.walker_file_count == 4
         assert stats_helper.walker_dir_skip_count == 0
@@ -56,6 +60,10 @@ class TestScanDirWalk(BaseTestCase):
 
         assert names == ['one', 'one.txt', 'two', 'two.txt']
 
+        assert stats_helper.abort is None  # done was not called
+        stats_helper.done()
+        assert stats_helper.abort is False  # no KeyboardInterrupt
+
         assert stats_helper.walker_dir_count == 2
         assert stats_helper.walker_file_count == 2
         assert stats_helper.walker_dir_skip_count == 0
@@ -77,6 +85,10 @@ class TestScanDirWalk(BaseTestCase):
         stats_helper.print_stats()
 
         assert names == ['skip1.foo', 'skip2.bar']
+
+        assert stats_helper.abort is None  # done was not called
+        stats_helper.done()
+        assert stats_helper.abort is False  # no KeyboardInterrupt
 
         assert stats_helper.walker_dir_count == 0
         assert stats_helper.walker_file_count == 2
