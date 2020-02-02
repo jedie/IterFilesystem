@@ -31,7 +31,7 @@ tqdm = "*"  # https://github.com/tqdm/tqdm
 psutil = "*"  # https://github.com/mitsuhiko/click
 
 [tool.poetry.dev-dependencies]
-poetry-publish = "^0.2.2"  # https://github.com/jedie/poetry-publish
+poetry-publish = "^0.2.3"  # https://github.com/jedie/poetry-publish
 tox = "^3.14.3"
 pytest = "^4.6"
 pytest-cov = "^2.8.1"
