@@ -3,6 +3,9 @@
     :license: GNU GPL v3 or above, see LICENSE for more details.
 """
 
+import os
+import shutil
+import subprocess
 from pathlib import Path
 
 # IterFilesystem
@@ -38,3 +41,17 @@ def test_version():
         file_path=Path(PACKAGE_ROOT, 'pyproject.toml'),
         string=f'version = "{__version__}"'
     )
+
+
+def test_poetry_check():
+    poerty_bin = shutil.which('poetry')
+
+    output = subprocess.check_output(
+        [poerty_bin, 'check'],
+        universal_newlines=True,
+        env=os.environ,
+        stderr=subprocess.STDOUT,
+        cwd=str(PACKAGE_ROOT),
+    )
+    print(output)
+    assert output == 'All set!\n'
