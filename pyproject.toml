@@ -42,6 +42,8 @@ flynt = "^0.40.1"
 autopep8 = "^1.4.4"
 
 [tool.poetry.scripts]
+update_rst_readme="iterfilesystem.publish:update_readme"
+publish="iterfilesystem.publish:publish"
 print_fs_stats="iterfilesystem.bin.print_fs_stats:main"
 
 [build-system]
