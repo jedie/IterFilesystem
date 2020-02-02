@@ -22,15 +22,30 @@ def human_time(t):
     return f'{round(t / divisor, 2):.1f}{unit}'
 
 
-def human_filesize(i):
+def human_filesize(bytes):
     """
-    'human-readable' file size (i.e. 13 KB, 4.1 MB, 102 bytes, etc).
+    'human-readable' file size:
+
+    >>> human_filesize(0)
+    '0 Byte'
+    >>> human_filesize(1)
+    '1 Byte'
+    >>> human_filesize(2)
+    '2 Bytes'
+    >>> human_filesize(1023)
+    '1023 Bytes'
+    >>> human_filesize(1024)
+    '1.0 KB'
+    >>> human_filesize(1.5 * 1024 * 1024)
+    '1.5 MB'
+    >>> human_filesize(2.75 * 1024 * 1024 * 1024)
+    '2.8 GB'
     """
-    bytes = float(i)
     if bytes < 1024:
-        return f"{bytes} Byte{bytes != 1 and 's' or ''}"
+        return f'{bytes} Byte{bytes>1 and "s" or ""}'
+    bytes = float(bytes)
     if bytes < 1024 * 1024:
-        return "%.1f KB" % (bytes / 1024)
+        return '%.1f KB' % (bytes / 1024)
     if bytes < 1024 * 1024 * 1024:
-        return "%.1f MB" % (bytes / (1024 * 1024))
-    return "%.1f GB" % (bytes / (1024 * 1024 * 1024))
+        return '%.1f MB' % (bytes / (1024 * 1024))
+    return '%.1f GB' % (bytes / (1024 * 1024 * 1024))
