@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pyhardlinkbackup"
+name = "IterFilesystem"
 version = "1.4.0.dev0"
 description = "Multiprocess directory iteration via os.scandir() with progress indicator via tqdm bars."
 authors = ["JensDiemer <git@jensdiemer.de>"]

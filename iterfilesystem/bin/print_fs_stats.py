@@ -17,7 +17,7 @@ import traceback
 from pathlib import Path
 
 # IterFilesystem
-from iterfilesystem import get_module_version
+import iterfilesystem
 from iterfilesystem.example import calc_sha512
 from iterfilesystem.process_bar import Printer
 
@@ -31,9 +31,8 @@ def main(*args):
         '-v',
         '--version',
         action='version',
-        version='%(prog)s ' +
-        get_module_version())
-
+        version='%(prog)s ' + iterfilesystem.__version__
+    )
     parser.add_argument(
         '--debug',
         action='store_true',
@@ -61,14 +60,14 @@ def main(*args):
     if args:
         print(f'Use args: {args!r}')
     else:
-        args = None
+        args=None
 
-    args = parser.parse_args(args)
+    args=parser.parse_args(args)
 
     if args.debug:
-        log_level = logging.DEBUG
+        log_level=logging.DEBUG
     else:
-        log_level = logging.ERROR
+        log_level=logging.ERROR
 
     logging.basicConfig(
         level=log_level,
@@ -77,7 +76,7 @@ def main(*args):
     )
 
     try:
-        statistics = calc_sha512(
+        statistics=calc_sha512(
             top_path=args.path,
             skip_dir_patterns=args.skip_dir_patterns,
             skip_file_patterns=args.skip_file_patterns,

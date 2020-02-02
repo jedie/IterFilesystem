@@ -28,7 +28,7 @@ def human_filesize(i):
     """
     bytes = float(i)
     if bytes < 1024:
-        return f"{bytes:d} Byte{bytes != 1 and 's' or ''}"
+        return f"{bytes} Byte{bytes != 1 and 's' or ''}"
     if bytes < 1024 * 1024:
         return "%.1f KB" % (bytes / 1024)
     if bytes < 1024 * 1024 * 1024:
