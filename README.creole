@@ -128,7 +128,7 @@ Total file size: 843.5 KB
 * [[https://github.com/jedie/IterFilesystem/compare/v1.4.0...master|**dev** - compare v1.4.0...master]]
 ** TBC
 * [[https://github.com/jedie/IterFilesystem/compare/v1.3.1...v1.4.0|02.02.2020 - v1.4.0]]
-** {{stats_helper.abort}} exists always usefull to get information if KeyboardInterrupt was used
+** {{{stats_helper.abort}}} exists always usefull to get information if KeyboardInterrupt was used
 ** use poetry and modernize project setup
 * [[https://github.com/jedie/IterFilesystem/compare/v1.3.0...v1.3.1|20.10.2019 - v1.3.1]]
 ** Bugfix if scan directory is completely empty
