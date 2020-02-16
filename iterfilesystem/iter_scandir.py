@@ -72,7 +72,7 @@ class ScandirWalker:
             log.error('scandir error: %s', err)
             return
 
-        for dir_entry in dir_entry_iterator:
+        for dir_entry in sorted(dir_entry_iterator, key=lambda x: x.name):
             if dir_entry.is_dir(follow_symlinks=False):
                 if self.fnmatches(dir_item_name=dir_entry.name, patterns=self.skip_dir_patterns):
                     self.stats_helper.walker_dir_skip_count += 1
