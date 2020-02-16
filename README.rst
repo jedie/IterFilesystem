@@ -155,9 +155,15 @@ example output looks like this:
 History
 -------
 
-* `**dev** - compare v1.4.1...master <https://github.com/jedie/IterFilesystem/compare/v1.4.1...master>`_ 
+* `**dev** - compare v1.4.2...master <https://github.com/jedie/IterFilesystem/compare/v1.4.2...master>`_ 
 
     * TBC
+
+* `16.02.2020 - v1.4.2 <https://github.com/jedie/IterFilesystem/compare/v1.4.1...v1.4.2>`_ 
+
+    * iterate over sorted dir entries
+
+    * update CI pipelines
 
 * `02.02.2020 - v1.4.1 <https://github.com/jedie/IterFilesystem/compare/v1.4.0...v1.4.1>`_ 
 
@@ -241,4 +247,4 @@ Donating
 
 ------------
 
-``Note: this file is generated from README.creole 2020-02-02 20:39:28 with "python-creole"``
+``Note: this file is generated from README.creole 2020-02-16 18:02:02 with "python-creole"``
