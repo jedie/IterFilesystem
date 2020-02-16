@@ -31,15 +31,15 @@ tqdm = "*"  # https://github.com/tqdm/tqdm
 psutil = "*"  # https://github.com/mitsuhiko/click
 
 [tool.poetry.dev-dependencies]
-poetry-publish = "^0.2.3"  # https://github.com/jedie/poetry-publish
-tox = "^3.14.3"
-pytest = "^4.6"
-pytest-cov = "^2.8.1"
+poetry-publish = "*"  # https://github.com/jedie/poetry-publish
+tox = "*"
+pytest = "*"
+pytest-cov = "*"
 coveralls = "*"
-isort = "^4.3.21"
-flake8 = "^3.7.9"
-flynt = "^0.40.1"
-autopep8 = "^1.4.4"
+isort = "*"
+flake8 = "*"
+flynt = "*"
+autopep8 = "*"
 
 [tool.poetry.scripts]
 update_rst_readme="iterfilesystem.publish:update_readme"
