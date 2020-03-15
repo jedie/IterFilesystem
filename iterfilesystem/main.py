@@ -19,7 +19,7 @@ from iterfilesystem.process_priority import set_high_priority, set_low_priority
 from iterfilesystem.statistic_helper import StatisticHelper
 from iterfilesystem.utils import UpdateInterval
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class IterFilesystem:

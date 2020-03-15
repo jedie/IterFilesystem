@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class ScandirWalker:
