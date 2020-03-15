@@ -2,7 +2,7 @@ import logging
 
 import psutil
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def set_high_priority():

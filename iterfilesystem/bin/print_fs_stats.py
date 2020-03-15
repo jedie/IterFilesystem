@@ -21,7 +21,7 @@ import iterfilesystem
 from iterfilesystem.example import calc_sha512
 from iterfilesystem.process_bar import Printer
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def main(*args):

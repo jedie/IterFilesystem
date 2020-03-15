@@ -19,7 +19,7 @@ from iterfilesystem.process_priority import set_high_priority, set_low_priority
 from iterfilesystem.statistic_helper import StatisticHelper
 from iterfilesystem.utils import UpdateInterval
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class IterFilesystem:
@@ -37,6 +37,8 @@ class IterFilesystem:
         self.update_interval_sec = update_interval_sec
         self.worker_update_interval = UpdateInterval(interval=self.update_interval_sec)
         self.wait = wait
+        if wait:
+            log.warning('Wait set! (Use is only intended for testing.)')
 
         # init in self.start()
         self.update_file_interval = None  # status interval for big file processing
@@ -81,8 +83,11 @@ class IterFilesystem:
         update_interval = UpdateInterval(interval=self.update_interval_sec)
         start_time = default_timer()
         for dir_entry in scan_dir_walker:
-            if dir_entry.is_file(follow_symlinks=False):
-                collect_file_size += dir_entry.stat().st_size
+            if dir_entry.is_file(follow_symlinks=True):
+                try:
+                    collect_file_size += dir_entry.stat().st_size
+                except OSError as err:
+                    log.error('Get file size error: %s', err)
 
             if update_interval:
                 multiprocessing_stats[FILE_SIZE] = collect_file_size
@@ -96,6 +101,7 @@ class IterFilesystem:
             f'Collect file size process done in {human_time(duration)}'
             f' ({human_filesize(collect_file_size)})'
         )
+        log.info('Collect file size process done in %.2fsec (%i Bytes)', duration, collect_file_size)
 
     def process(self):
         with Manager() as manager:

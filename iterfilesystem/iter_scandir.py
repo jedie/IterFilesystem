@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class ScandirWalker:
@@ -25,8 +25,10 @@ class ScandirWalker:
     # These methods may be overwritten:
 
     def get_top_path(self, top_path):
+        msg = f'Read/process: {top_path!r}...'
+        log.debug(msg)
         if self.verbose:
-            print(f'Read/process: {top_path!r}...')
+            print(msg)
         top_path = Path(top_path).expanduser().resolve()
         if not top_path.is_dir():
             raise NotADirectoryError(f'Directory does not exists: {top_path}')
