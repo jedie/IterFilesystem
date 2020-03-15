@@ -83,8 +83,11 @@ class IterFilesystem:
         update_interval = UpdateInterval(interval=self.update_interval_sec)
         start_time = default_timer()
         for dir_entry in scan_dir_walker:
-            if dir_entry.is_file(follow_symlinks=False):
-                collect_file_size += dir_entry.stat().st_size
+            if dir_entry.is_file(follow_symlinks=True):
+                try:
+                    collect_file_size += dir_entry.stat().st_size
+                except OSError as err:
+                    log.error('Get file size error: %s', err)
 
             if update_interval:
                 multiprocessing_stats[FILE_SIZE] = collect_file_size
