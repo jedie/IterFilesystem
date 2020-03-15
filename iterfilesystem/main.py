@@ -37,6 +37,8 @@ class IterFilesystem:
         self.update_interval_sec = update_interval_sec
         self.worker_update_interval = UpdateInterval(interval=self.update_interval_sec)
         self.wait = wait
+        if wait:
+            log.warning('Wait set! (Use is only intended for testing.)')
 
         # init in self.start()
         self.update_file_interval = None  # status interval for big file processing
@@ -96,6 +98,7 @@ class IterFilesystem:
             f'Collect file size process done in {human_time(duration)}'
             f' ({human_filesize(collect_file_size)})'
         )
+        log.info('Collect file size process done in %.2fsec (%i Bytes)', duration, collect_file_size)
 
     def process(self):
         with Manager() as manager:
