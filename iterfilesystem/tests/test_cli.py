@@ -54,7 +54,7 @@ class TestCli(BaseTestCase):
 
         assert pytest_wrapped_e.value.code == 1
 
-    def test_cli_scan(self, caplog, capsys):
+    def test_cli_scan(self, capsys):
         main(
             '--path', str(self.package_path),
             '--skip_dir_patterns', *self.skip_dir_patterns,
@@ -66,10 +66,3 @@ class TestCli(BaseTestCase):
 
         assert 'usage: print_fs_stats.py' not in captured_out
         assert "'hash': " in captured_out
-
-        logs = caplog.text
-        print('-' * 100)
-        print(logs)
-        print('-' * 100)
-
-        assert logs == ''
