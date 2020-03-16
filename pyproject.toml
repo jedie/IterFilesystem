@@ -33,6 +33,7 @@ psutil = "*"  # https://github.com/mitsuhiko/click
 poetry-publish = "*"  # https://github.com/jedie/poetry-publish
 tox = "*"
 pytest = "*"
+pytest-randomly = "*"
 pytest-cov = "*"
 coveralls = "*"
 isort = "*"

@@ -1,15 +1,12 @@
 from pathlib import Path
 
 # IterFilesystem
-from iterfilesystem import setup_logging
 from iterfilesystem.iter_scandir import ScandirWalker
 from iterfilesystem.statistic_helper import StatisticHelper
 from iterfilesystem.utils import UpdateInterval
 
 
 def main(top_path):
-    setup_logging()
-
     top_path = Path(top_path).expanduser().resolve()
     print(f'Benchmark: {top_path} ...')
 

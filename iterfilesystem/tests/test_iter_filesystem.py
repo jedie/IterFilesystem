@@ -26,24 +26,25 @@ def test_iter_filesystem_collect_counts(tmp_path, capsys, caplog):
         counts_dict = {}
         iter_fs._collect_counts(counts_dict)
 
-    captured = capsys.readouterr()
+        captured = capsys.readouterr()
+        assert captured.out == ''
 
-    stdout = captured.out
-    print('_' * 100)
-    print('stdout:')
-    print(stdout)
-    print('=' * 100)
+        logs = caplog.text
 
-    assert captured.err == ''
+    print('-' * 100)
+    print(logs)
+    print('-' * 100)
 
-    assert 'No skip directory patterns, ok.' in stdout
-    assert 'No skip file patterns, ok.' in stdout
-    assert 'Collect filesystem item process done' in stdout
-    assert '(10 items)' in stdout
+    assert 'No skip directory patterns, ok.' in logs
+    assert 'No skip file patterns, ok.' in logs
+
+    assert 'Collect filesystem item process done' in logs
+    assert '(10 items)' in logs
 
     assert set(counts_dict.keys()) == {'count duration', 'count done', 'dir item count'}
     assert counts_dict['count done'] is True
     assert counts_dict['dir item count'] == 10
+
 
 
 def test_iter_filesystem_collect_size(tmp_path, capsys, caplog):
@@ -66,31 +67,24 @@ def test_iter_filesystem_collect_size(tmp_path, capsys, caplog):
         iter_fs._collect_size(size_dict)
 
     captured = capsys.readouterr()
+    assert captured.out == ''
 
-    stdout = captured.out
-    print('_' * 100)
-    print('stdout:')
-    print(stdout)
-    print('=' * 100)
+    logs = caplog.text
+    print('-' * 100)
+    print(logs)
+    print('-' * 100)
 
-    print('_' * 100)
-    print('stderr:')
-    print(captured.err)
-    print('=' * 100)
-
-    assert captured.err == ''
-
-    assert 'No skip directory patterns, ok.' in stdout
-    assert 'No skip file patterns, ok.' in stdout
-    assert 'Collect file size process done' in stdout
-    assert '(20 Bytes)' in stdout
+    assert 'No skip directory patterns, ok.' in logs
+    assert 'No skip file patterns, ok.' in logs
+    assert 'Collect file size process done' in logs
+    assert '(20 Bytes)' in logs
 
     assert set(size_dict.keys()) == {'size duration', 'file size', 'size done'}
     assert size_dict['size done'] is True
     assert size_dict['file size'] == 20
 
 
-def test_iter_filesystem(tmp_path, capsys, caplog):
+def test_iter_filesystem(tmp_path, caplog):
     for no in range(10):
         with Path(tmp_path, f'file_{no}.txt').open('wb') as f:
             f.write(b'XX')
@@ -98,7 +92,6 @@ def test_iter_filesystem(tmp_path, capsys, caplog):
     with caplog.at_level(logging.DEBUG, logger="iterfilesystem"):
         class TestIterFilesystem(IterFilesystem):
             def process_dir_entry(self, dir_entry, process_bars):
-                print(dir_entry.name)
                 time.sleep(0.01)
                 self.update(
                     dir_entry=dir_entry,
@@ -132,23 +125,22 @@ def test_iter_filesystem(tmp_path, capsys, caplog):
     print(logs)
     print('-' * 100)
 
-    assert 'DEBUG Read/process:' in logs
-    assert 'WARNING Wait set!' in logs
-    assert 'INFO Worker starts' in logs
-    assert 'INFO Worker done.' in logs
+    assert 'Read/process:' in logs
+    assert 'Wait set!' in logs
+    assert 'Worker starts' in logs
+    assert 'Worker done.' in logs
 
-    assert 'INFO Set lower ionice priority' in logs
-    assert 'INFO Set lower nice priority' in logs
-    assert 'INFO Set higher ionice priority' in logs
+    assert 'Set lower ionice priority' in logs
+    assert 'Set lower nice priority' in logs
+    assert 'Set higher ionice priority' in logs
 
 
-def test_keyboard_interrupt(tmp_path, capsys):
+def test_keyboard_interrupt(tmp_path, capsys, caplog):
     for no in range(5):
         Path(tmp_path, f'file_{no}.txt').touch()
 
     class TestIterFilesystem(IterFilesystem):
         def process_dir_entry(self, dir_entry, process_bars):
-            print(dir_entry.name)
             if dir_entry.name == 'file_2.txt':
                 raise KeyboardInterrupt
             self.update(
@@ -186,8 +178,12 @@ def test_keyboard_interrupt(tmp_path, capsys):
     print(stderr)
     print('=' * 100)
 
-    assert '*** Abort via keyboard interrupt! ***' in stderr
-    assert 'file_0.txt\nfile_1.txt\nfile_2.txt\n' in stdout
+    logs = caplog.text
+    print('-' * 100)
+    print(logs)
+    print('-' * 100)
+
+    assert '*** Abort via keyboard interrupt! ***' in logs
 
     assert stats_helper.walker_dir_count == 0
     assert stats_helper.walker_file_count == 3

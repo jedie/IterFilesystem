@@ -1,11 +1,9 @@
 import logging
-import sys
 import traceback
 from multiprocessing import Manager, Process
 from timeit import default_timer
 
 # IterFilesystem
-from iterfilesystem import setup_logging
 from iterfilesystem.constants import (
     COLLECT_COUNT_DONE,
     COLLECT_COUNT_DURATION,
