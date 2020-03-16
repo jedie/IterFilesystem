@@ -104,29 +104,29 @@ class TestExample(BaseTestCase):
                 wait=True
             )
 
-        captured_out, captured_err = verbose_get_capsys(capsys)
+            captured_out, captured_err = verbose_get_capsys(capsys)
 
-        stats_helper2assertments(stats_helper)
+            stats_helper2assertments(stats_helper)
 
-        assert stats_helper.collect_dir_item_count == 12
-        assert stats_helper.collect_file_size == 20
-        assert stats_helper.process_file_size == 20
-        assert stats_helper.walker_dir_count == 0
-        assert stats_helper.walker_dir_skip_count == 0
-        assert stats_helper.walker_file_count == 12
-        assert stats_helper.walker_file_skip_count == 0
+            assert stats_helper.collect_dir_item_count == 12
+            assert stats_helper.collect_file_size == 20
+            assert stats_helper.process_file_size == 20
+            assert stats_helper.walker_dir_count == 0
+            assert stats_helper.walker_dir_skip_count == 0
+            assert stats_helper.walker_file_count == 12
+            assert stats_helper.walker_file_skip_count == 0
 
-        if sys.platform == 'win32':
-            # .touch(mode=0o200) doesn't work on Windows ;)
-            assert stats_helper.process_error_count == 0
-            assert stats_helper.process_files == 11
-        else:
-            assert stats_helper.process_error_count == 1
-            assert stats_helper.process_files == 10
+            assert stats_helper.process_files == 12
 
-            assert 'Error processing dir entry' in captured_out
-            assert 'PermissionError: [Errno 13] Permission denied:' in captured_out
-            assert 'no_read.txt' in captured_out
+            if sys.platform == 'win32':
+                # .touch(mode=0o200) doesn't work on Windows ;)
+                assert stats_helper.process_error_count == 0
+            else:
+                assert stats_helper.process_error_count == 1
+
+                assert 'Error processing dir entry' in captured_out
+                assert 'PermissionError: [Errno 13] Permission denied:' in captured_out
+                assert 'no_read.txt' in captured_out
 
         assert stats_helper.hash == expected_hash
 

@@ -13,9 +13,8 @@ class ScandirWalker:
             top_path,
             stats_helper,
             skip_dir_patterns=(),
-            skip_file_patterns=(),
-            verbose=True):
-        self.verbose = verbose
+            skip_file_patterns=()):
+
         self.top_path = self.get_top_path(top_path)
         self.stats_helper = stats_helper
         self.skip_dir_patterns = self.get_skip_dir_patterns(skip_dir_patterns)
@@ -25,23 +24,21 @@ class ScandirWalker:
     # These methods may be overwritten:
 
     def get_top_path(self, top_path):
-        msg = f'Read/process: {top_path!r}...'
-        log.debug(msg)
-        if self.verbose:
-            print(msg)
+        log.info('Read/process: %r...', top_path)
+
         top_path = Path(top_path).expanduser().resolve()
         if not top_path.is_dir():
             raise NotADirectoryError(f'Directory does not exists: {top_path}')
         return top_path
 
     def get_pattern(self, kind, skip_patterns):
-        if self.verbose:
-            if skip_patterns:
-                print(f'Skip {kind} patterns:')
-                print('\t* ' + '\n\t* '.join(skip_patterns))
-                print()
-            else:
-                print(f'No skip {kind} patterns, ok.')
+        if skip_patterns:
+            log.info('Skip %s patterns:', kind)
+            for pattern in skip_patterns:
+                log.info(' * %s', pattern)
+        else:
+            log.info('No skip %s patterns, ok.', kind)
+
         return skip_patterns
 
     def get_skip_dir_patterns(self, skip_dir_patterns):

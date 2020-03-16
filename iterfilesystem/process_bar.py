@@ -7,7 +7,7 @@ from textwrap import shorten
 from tqdm import tqdm
 
 
-class Printer:
+class TqdmPrinter:
     @classmethod
     def write(cls, s, file=None, end='\n', nolock=False):
         tqdm.write('\r\n\n\n\n')
@@ -61,7 +61,7 @@ class WorkerTqdm(tqdm):
             desc='Average progress..',
             position=position,
             total=100,
-            bar_format='{l_bar}{bar}|{elapsed}<{remaining} {postfix}',
+            bar_format='{l_bar}{bar}|elapsed: {elapsed} remaining: {remaining}',
             dynamic_ncols=True,
         )
 
@@ -84,23 +84,16 @@ class WorkerTqdm(tqdm):
         self.refresh(nolock=True)
 
 
-class PostfixOnlyTqdm(tqdm):
-    def __init__(self, desc, position=None, leave=True):
-        super().__init__(
-            desc=desc,
-            position=position,
-            total=sys.maxsize,
-            bar_format='{desc}:{postfix}',
-            dynamic_ncols=True,
-            leave=leave,
-        )
-
-
-class FileNameTqdm(PostfixOnlyTqdm):
+class FileNameTqdm(tqdm):
     def __init__(self, position=None):
         super().__init__(
             desc='Current File......',
+            postfix=None,
             position=position,
+            total=sys.maxsize,
+            bar_format='{desc}',
+            dynamic_ncols=True,
+            leave=True,
         )
         if not self.ncols:
             self.path_width = 50
@@ -108,11 +101,13 @@ class FileNameTqdm(PostfixOnlyTqdm):
             self.path_width = self.ncols - 10
 
     def update(self, stats_helper, dir_entry):
-        self.postfix = shorten(
+        file_path = shorten(
             str(Path(dir_entry).resolve()),
             width=self.path_width,
             placeholder='...'
         )
+        self.desc = f'Current File......: {file_path}'
+
         self.total = stats_helper.collect_dir_item_count
         self.n = stats_helper.get_walker_dir_item_count()
         self.refresh(nolock=True)

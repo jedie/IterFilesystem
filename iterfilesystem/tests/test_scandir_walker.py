@@ -26,7 +26,6 @@ class TestScanDirWalk(BaseTestCase):
             stats_helper=stats_helper,
             skip_dir_patterns=(),
             skip_file_patterns=(),
-            verbose=True
         )
         names = sorted([dir_item.name for dir_item in sw])
 
@@ -52,7 +51,6 @@ class TestScanDirWalk(BaseTestCase):
             stats_helper=stats_helper,
             skip_dir_patterns=(),
             skip_file_patterns=('*.foo', '*.b?r'),
-            verbose=True
         )
         names = sorted([dir_item.name for dir_item in sw])
 
@@ -78,7 +76,6 @@ class TestScanDirWalk(BaseTestCase):
             stats_helper=stats_helper,
             skip_dir_patterns=('o?e', 't*'),
             skip_file_patterns=(),
-            verbose=True
         )
         names = sorted([dir_item.name for dir_item in sw])
 

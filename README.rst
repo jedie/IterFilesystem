@@ -103,7 +103,7 @@ Use example CLI, e.g.:
     ...
     Successfully installed iterfilesystem
     
-    (IterFilesystem) ~/IterFilesystem$ $ print_fs_stats --help
+    ~/IterFilesystem$ $ poetry run print_fs_stats --help
     usage: print_fs_stats.py [-h] [-v] [--debug] [--path PATH]
                              [--skip_dir_patterns [SKIP_DIR_PATTERNS [SKIP_DIR_PATTERNS ...]]]
                              [--skip_file_patterns [SKIP_FILE_PATTERNS [SKIP_FILE_PATTERNS ...]]]
@@ -155,9 +155,17 @@ example output looks like this:
 History
 -------
 
-* `**dev** - compare v1.4.2...master <https://github.com/jedie/IterFilesystem/compare/v1.4.2...master>`_ 
+* `**dev** - compare v1.4.3...master <https://github.com/jedie/IterFilesystem/compare/v1.4.3...master>`_ 
 
     * TBC
+
+* `16.03.2020 - v1.4.3 <https://github.com/jedie/IterFilesystem/compare/v1.4.2...v1.4.3>`_ 
+
+    * Use logging and remove "verbose mode"
+
+    * Nicer "Average progess" bar
+
+    * Bugfix "Current File" bar: remove comma
 
 * `16.02.2020 - v1.4.2 <https://github.com/jedie/IterFilesystem/compare/v1.4.1...v1.4.2>`_ 
 
@@ -247,4 +255,4 @@ Donating
 
 ------------
 
-``Note: this file is generated from README.creole 2020-02-16 18:02:02 with "python-creole"``
+``Note: this file is generated from README.creole 2020-03-16 18:09:30 with "python-creole"``
