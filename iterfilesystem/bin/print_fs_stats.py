@@ -73,7 +73,7 @@ def main(*args):
     except NotADirectoryError as err:
         print(f'ERROR: {err}')
         sys.exit(1)
-    except Exception as err:
+    except Exception:
         print('=' * 100, file=sys.stderr)
         print(traceback.format_exc(), file=sys.stderr)
         print('=' * 100, file=sys.stderr)

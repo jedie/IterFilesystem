@@ -46,7 +46,6 @@ def test_iter_filesystem_collect_counts(tmp_path, capsys, caplog):
     assert counts_dict['dir item count'] == 10
 
 
-
 def test_iter_filesystem_collect_size(tmp_path, capsys, caplog):
     for no in range(10):
         with Path(tmp_path, f'file_{no}.txt').open('wb') as f:
