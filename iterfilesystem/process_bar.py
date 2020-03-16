@@ -7,7 +7,7 @@ from textwrap import shorten
 from tqdm import tqdm
 
 
-class Printer:
+class TqdmPrinter:
     @classmethod
     def write(cls, s, file=None, end='\n', nolock=False):
         tqdm.write('\r\n\n\n\n')

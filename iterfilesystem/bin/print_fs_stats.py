@@ -19,14 +19,14 @@ from pathlib import Path
 # IterFilesystem
 import iterfilesystem
 from iterfilesystem.example import calc_sha512
-from iterfilesystem.process_bar import Printer
 
 log = logging.getLogger(__name__)
 
 
 def main(*args):
-    parser = argparse.ArgumentParser(prog=Path(__file__).name,
-                                     description='Scan filesystem and print some information')
+    parser = argparse.ArgumentParser(
+        prog=Path(__file__).name,
+        description='Scan filesystem and print some information')
     parser.add_argument(
         '-v',
         '--version',
@@ -64,38 +64,25 @@ def main(*args):
 
     args = parser.parse_args(args)
 
-    if args.debug:
-        log_level = logging.DEBUG
-    else:
-        log_level = logging.ERROR
-
-    logging.basicConfig(
-        level=log_level,
-        format='[%(processName)s %(levelname)4s:%(lineno)4s %(asctime)s] %(message)s',
-        stream=Printer
-    )
-
     try:
         statistics = calc_sha512(
             top_path=args.path,
             skip_dir_patterns=args.skip_dir_patterns,
             skip_file_patterns=args.skip_file_patterns,
         )
-        if args.debug:
-            print('\ndebug statistics:')
-            statistics.print_stats()
-        print()
     except NotADirectoryError as err:
         print(f'ERROR: {err}')
         sys.exit(1)
     except Exception as err:
         print('=' * 100, file=sys.stderr)
-        if args.debug:
-            print(traceback.format_exc(), file=sys.stderr)
-            print('=' * 100, file=sys.stderr)
-        print(err, file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
         print('=' * 100, file=sys.stderr)
         sys.exit(-1)
+    else:
+        if args.debug:
+            print('\ndebug statistics:')
+            statistics.print_stats()
+        print()
 
 
 ###############################################################################

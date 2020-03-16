@@ -5,6 +5,7 @@ from multiprocessing import Manager, Process
 from timeit import default_timer
 
 # IterFilesystem
+from iterfilesystem import setup_logging
 from iterfilesystem.constants import (
     COLLECT_COUNT_DONE,
     COLLECT_COUNT_DURATION,
@@ -14,7 +15,7 @@ from iterfilesystem.constants import (
     FILE_SIZE
 )
 from iterfilesystem.humanize import human_filesize, human_time
-from iterfilesystem.process_bar import IterFilesystemProcessBar, Printer
+from iterfilesystem.process_bar import IterFilesystemProcessBar, TqdmPrinter
 from iterfilesystem.process_priority import set_high_priority, set_low_priority
 from iterfilesystem.statistic_helper import StatisticHelper
 from iterfilesystem.utils import UpdateInterval
@@ -26,13 +27,12 @@ class IterFilesystem:
     multiprocessing_stats = None  # will be created in process()
 
     def __init__(self, *, ScanDirClass, scan_dir_kwargs, update_interval_sec, wait=False):
-
         self.stats_helper = StatisticHelper()
         self.ScanDirClass = ScanDirClass
         self.scan_dir_kwargs = scan_dir_kwargs
 
         # fail fast -> check if scan directory exists, before create sub processed:
-        self.worker_scan_dir = self._get_scan_dir_instance(verbose=True)
+        self.worker_scan_dir = self._get_scan_dir_instance()
 
         self.update_interval_sec = update_interval_sec
         self.worker_update_interval = UpdateInterval(interval=self.update_interval_sec)
@@ -44,9 +44,8 @@ class IterFilesystem:
         self.update_file_interval = None  # status interval for big file processing
         self.low_priority_set = None
 
-    def _get_scan_dir_instance(self, verbose):
+    def _get_scan_dir_instance(self):
         self.scan_dir_kwargs.update(dict(
-            verbose=verbose,
             stats_helper=self.stats_helper
         ))
         return self.ScanDirClass(**self.scan_dir_kwargs)
@@ -54,7 +53,7 @@ class IterFilesystem:
     def _collect_counts(self, multiprocessing_stats):
         log.info('Collect filesystem item process starts')
         set_high_priority()
-        scan_dir_walker = self._get_scan_dir_instance(verbose=False)
+        scan_dir_walker = self._get_scan_dir_instance()
 
         update_interval = UpdateInterval(interval=self.update_interval_sec)
         start_time = default_timer()
@@ -69,7 +68,7 @@ class IterFilesystem:
         multiprocessing_stats[COLLECT_COUNT_DONE] = True
         multiprocessing_stats[COLLECT_COUNT_DURATION] = duration
 
-        Printer.write(
+        log.info(
             f'Collect filesystem item process done in {human_time(duration)}'
             f' ({scan_dir_walker.stats_helper.get_walker_dir_item_count()} items)'
         )
@@ -78,7 +77,7 @@ class IterFilesystem:
         log.info('Collect file size process starts')
         set_high_priority()
         collect_file_size = 0
-        scan_dir_walker = self._get_scan_dir_instance(verbose=False)
+        scan_dir_walker = self._get_scan_dir_instance()
 
         update_interval = UpdateInterval(interval=self.update_interval_sec)
         start_time = default_timer()
@@ -97,11 +96,10 @@ class IterFilesystem:
         multiprocessing_stats[COLLECT_SIZE_DONE] = True
         multiprocessing_stats[COLLECT_SIZE_DURATION] = duration
 
-        Printer.write(
+        log.info(
             f'Collect file size process done in {human_time(duration)}'
             f' ({human_filesize(collect_file_size)})'
         )
-        log.info('Collect file size process done in %.2fsec (%i Bytes)', duration, collect_file_size)
 
     def process(self):
         with Manager() as manager:
@@ -135,16 +133,18 @@ class IterFilesystem:
 
                 if self.wait:
                     # In tests we would like to see all results
+                    log.debug('Wait for collect processes.')
                     collect_size_process.join()
                     collect_count_process.join()
                 else:
                     # After process all files, the stat processes not needed:
+                    log.debug('Terminate collect processes.')
                     collect_size_process.terminate()
                     collect_count_process.terminate()
             except KeyboardInterrupt:
                 self.stats_helper.abort = True
                 self.stats_helper.process_duration = default_timer() - start_time
-                print('\n *** Abort via keyboard interrupt! ***\n', file=sys.stderr)
+                log.warning('*** Abort via keyboard interrupt! ***')
             finally:
                 if collect_size_process is not None:
                     collect_size_process.terminate()
@@ -177,7 +177,7 @@ class IterFilesystem:
     # methods to overwrite:
 
     def start(self):
-        log.info('Worker starts')
+        log.debug('Worker starts')
 
         self.update_file_interval = UpdateInterval(interval=self.update_interval_sec)
         with IterFilesystemProcessBar() as process_bars:
@@ -187,7 +187,7 @@ class IterFilesystem:
                     self.process_dir_entry(dir_entry=dir_entry, process_bars=process_bars)
                 except OSError:
                     self.stats_helper.process_error_count += 1
-                    Printer.write('\n'.join([
+                    TqdmPrinter.write('\n'.join([
                         '=' * 100,
                         f'Error processing dir entry: {dir_entry.path}',
                         ' -' * 50,
@@ -202,7 +202,8 @@ class IterFilesystem:
 
             if dir_entry is not None:
                 self._update_stats_helper(dir_entry, process_bars)
-        log.info('Worker done.')
+
+        log.debug('Worker done.')
 
     def process_dir_entry(self, dir_entry, process_bars):
         """

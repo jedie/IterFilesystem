@@ -18,7 +18,6 @@ def test_iter_filesystem_collect_counts(tmp_path, capsys, caplog):
                 top_path=tmp_path,
                 skip_dir_patterns=(),
                 skip_file_patterns=(),
-                verbose=True
             ),
             update_interval_sec=0.1,
             wait=True,
@@ -59,7 +58,6 @@ def test_iter_filesystem_collect_size(tmp_path, capsys, caplog):
                 top_path=tmp_path,
                 skip_dir_patterns=(),
                 skip_file_patterns=(),
-                verbose=True
             ),
             update_interval_sec=0.1,
             wait=True,
@@ -73,6 +71,11 @@ def test_iter_filesystem_collect_size(tmp_path, capsys, caplog):
     print('_' * 100)
     print('stdout:')
     print(stdout)
+    print('=' * 100)
+
+    print('_' * 100)
+    print('stderr:')
+    print(captured.err)
     print('=' * 100)
 
     assert captured.err == ''
@@ -109,7 +112,6 @@ def test_iter_filesystem(tmp_path, capsys, caplog):
                 top_path=tmp_path,
                 skip_dir_patterns=(),
                 skip_file_patterns=(),
-                verbose=True
             ),
             update_interval_sec=0.01,
             wait=True,
@@ -161,7 +163,6 @@ def test_keyboard_interrupt(tmp_path, capsys):
             top_path=tmp_path,
             skip_dir_patterns=(),
             skip_file_patterns=(),
-            verbose=True
         ),
         update_interval_sec=0.5,
     )

@@ -6,6 +6,7 @@ from pathlib import Path
 from timeit import default_timer
 
 # IterFilesystem
+from iterfilesystem import setup_logging
 from iterfilesystem.humanize import human_filesize
 from iterfilesystem.iter_scandir import ScandirWalker
 from iterfilesystem.main import IterFilesystem
@@ -112,6 +113,8 @@ class CalcFilesystemSHA512(IterFilesystem):
 
 
 def calc_sha512(*, top_path, skip_dir_patterns=(), skip_file_patterns=(), wait=False):
+    setup_logging()
+
     calc_sha = CalcFilesystemSHA512(
         ScanDirClass=ScandirWalker,
         scan_dir_kwargs=dict(
