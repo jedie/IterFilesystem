@@ -169,7 +169,6 @@ class IterFilesystem:
         process_bars.update(self.stats_helper, dir_entry)
 
     def update(self, dir_entry, file_size, process_bars):
-        self.stats_helper.process_files += 1
         self.stats_helper.update(file_size=file_size)
         if self.worker_update_interval:
             self._update_stats_helper(dir_entry, process_bars)
@@ -195,6 +194,8 @@ class IterFilesystem:
                         traceback.format_exc().rstrip(),
                         '=' * 100,
                     ]))
+
+                self.stats_helper.process_files += 1
 
                 if self.worker_update_interval:
                     self._update_stats_helper(dir_entry, process_bars)
