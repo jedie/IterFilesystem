@@ -125,8 +125,12 @@ Total file size: 843.5 KB
 
 == History
 
-* [[https://github.com/jedie/IterFilesystem/compare/v1.4.2...master|**dev** - compare v1.4.2...master]]
+* [[https://github.com/jedie/IterFilesystem/compare/v1.4.3...master|**dev** - compare v1.4.3...master]]
 ** TBC
+* [[https://github.com/jedie/IterFilesystem/compare/v1.4.2...v1.4.3|16.03.2020 - v1.4.3]]
+** Use logging and remove "verbose mode"
+** Nicer "Average progess" bar
+** Bugfix "Current File" bar: remove comma
 * [[https://github.com/jedie/IterFilesystem/compare/v1.4.1...v1.4.2|16.02.2020 - v1.4.2]]
 ** iterate over sorted dir entries
 ** update CI pipelines
