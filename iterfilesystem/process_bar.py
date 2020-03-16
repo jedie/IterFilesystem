@@ -61,7 +61,7 @@ class WorkerTqdm(tqdm):
             desc='Average progress..',
             position=position,
             total=100,
-            bar_format='{l_bar}{bar}|{elapsed}<{remaining} {postfix}',
+            bar_format='{l_bar}{bar}|elapsed: {elapsed} remaining: {remaining}',
             dynamic_ncols=True,
         )
 
