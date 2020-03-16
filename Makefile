@@ -62,5 +62,7 @@ update-rst-readme: ## update README.rst from README.creole
 publish: ## Release new version to PyPi
 	poetry run publish
 
+print_fs_stats: ## run the example application "print_fs_stats"
+	poetry run print_fs_stats --path .
 
 .PHONY: help install lint fix test publish
