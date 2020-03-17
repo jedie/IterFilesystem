@@ -13,13 +13,12 @@ from iterfilesystem.main import IterFilesystem
 
 class CalcFilesystemSHA512(IterFilesystem):
     MIN_CHUNK_SIZE = 10 * 1024 * 1024
-    MAX_CHUNK_SIZE = sys.maxsize
+    MAX_CHUNK_SIZE = sys.maxsize  # better use: psutil.virtual_memory().available
 
     def start(self):
         self.hash = hashlib.sha512()
 
         self.chunk_size = self.MIN_CHUNK_SIZE
-        self.update_interval_trigger = self.update_interval_sec / 2
 
         self.big_file_count = 0
         super().start()
@@ -41,14 +40,14 @@ class CalcFilesystemSHA512(IterFilesystem):
                     data = f.read(self.chunk_size)
                 except MemoryError:
                     # Lower the chunk size to avoid memory errors
-                    while self.chunk_size > 2:
+                    while self.chunk_size > self.MIN_CHUNK_SIZE:
                         self.chunk_size = int(self.chunk_size * 0.25)
-                        self.MAX_CHUNK_SIZE = self.chunk_size
                         try:
                             data = f.read(self.chunk_size)
                         except MemoryError:
                             continue
                         else:
+                            self.MAX_CHUNK_SIZE = self.chunk_size
                             print(f'set max block size to: {self.MAX_CHUNK_SIZE} Bytes.')
                             break
 
@@ -65,10 +64,16 @@ class CalcFilesystemSHA512(IterFilesystem):
                     # Calculate the chunk size, so we update the current file bar
                     # in self.update_interval_sec intervals
                     duration = default_timer() - start_time
-                    if duration < self.update_interval_sec and self.chunk_size < self.MAX_CHUNK_SIZE:
-                        self.chunk_size = min([int(self.chunk_size * 1.25), self.MAX_CHUNK_SIZE])
-                    elif duration > self.update_interval_sec:
-                        self.chunk_size = max([int(self.chunk_size * 0.75), self.MIN_CHUNK_SIZE])
+                    throughput = chunk_size / duration
+                    new_chunk_size = throughput * self.update_interval_sec
+
+                    chunk_size = int((new_chunk_size + chunk_size) / 2)
+                    if chunk_size < self.MIN_CHUNK_SIZE:
+                        chunk_size = self.MIN_CHUNK_SIZE
+                    if chunk_size > self.MAX_CHUNK_SIZE:
+                        chunk_size = self.MAX_CHUNK_SIZE
+
+                    self.chunk_size = chunk_size
 
                     if not big_file:
                         # init current file bar
